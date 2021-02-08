@@ -1,0 +1,9 @@
+services:
+  zoo:
+    image: zookeeper
+    restart: always
+    hostname: zoo
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
