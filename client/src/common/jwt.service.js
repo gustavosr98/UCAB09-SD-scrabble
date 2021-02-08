@@ -19,7 +19,7 @@ export default {
     ls.remove(ID_TOKEN_KEY);
   },
   isTokenValid() {
-    const token = getToken();
+    const token = this.getToken();
     return !!(token && !vueEasyJwt.isExpired(token));
   },
   getAuthHeaderToken() {
@@ -27,7 +27,7 @@ export default {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${this.getToken()}`,
       },
     };
   },

@@ -6,6 +6,6 @@ export default class UsersRepository extends Repository {
   }
 
   async authorize(payload) {
-    return httpClient.post("authorize", payload);
+    return this.httpClient.post("authorize", payload);
   }
 }

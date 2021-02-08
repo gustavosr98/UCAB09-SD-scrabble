@@ -5,7 +5,9 @@
         <v-icon x-large color="white">mdi-alert</v-icon>
       </v-toolbar>
       <v-card class="text-center word-break">
-        <v-card-title class="headline justify-center word-break">{{ title }}</v-card-title>
+        <v-card-title class="headline justify-center word-break">{{
+          title
+        }}</v-card-title>
         <v-card-text class="word-break">{{ message }}</v-card-text>
         <v-card-actions class="d-flex justify-end">
           <v-btn color="grey" dark @click="cancelAction">{{ cancel }}</v-btn>
