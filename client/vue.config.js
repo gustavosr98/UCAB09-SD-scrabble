@@ -18,4 +18,9 @@ module.exports = {
       msTileImage: "img/icons/mstile-150x150.png",
     },
   },
+  pluginOptions: {
+    electronBuilder: {
+      nodeIntegration: true
+    }
+  }
 };
