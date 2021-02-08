@@ -9,7 +9,7 @@ import vuetify from "./plugins/vuetify";
 import VueTheMask from "vue-the-mask";
 import VueApexCharts from "vue-apexcharts";
 
-import httpClient from "@/http/http-client";
+import httpClient from "@/connections/server/http-client";
 
 Vue.config.productionTip = false;
 Vue.prototype.$http = httpClient;

@@ -1,7 +1,6 @@
-import jwt from "../../common/jwt.service";
-import httpClient from "@/http/http-client";
-
-import UsersRepository from "../../http/repositories/users.respository";
+import httpClient from "@/connections/server/http-client";
+import jwt from "@/connections/server/jwt.service";
+import UsersRepository from "@/connections/server/repositories/users.respository";
 const usersRepository = new UsersRepository();
 
 const initialState = () => {

@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import jwt from "@/common/jwt.service";
+import jwt from "@/connections/server/jwt.service";
 import LogoFull from "@/assets/Brand/Logo_Full.png";
 
 export default {

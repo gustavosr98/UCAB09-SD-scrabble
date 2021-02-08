@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import jwt from "@/common/jwt.service";
+import jwt from "@/connections/server/jwt.service";
 import { mapMutations } from "vuex";
 
 export default {
