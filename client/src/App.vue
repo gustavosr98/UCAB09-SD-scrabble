@@ -19,7 +19,6 @@ export default {
   computed: {
     ...mapState("ux", ["backgroundDark"]),
   },
-  mounted() {},
 };
 </script>
 

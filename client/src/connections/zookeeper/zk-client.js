@@ -3,19 +3,15 @@ var zookeeper = require("node-zookeeper-client");
 export default class ZKClient {
   constructor() {
     this.basePath = "/g5";
-    this.client = zookeeper.createClient(process.env.VUE_APP_ZK_URL, {
+    this.client = zookeeper.createClient("zoo:2181", {
       sessionTimeout: process.env.VUE_APP_ZK_TIMEOUT,
     });
-
-    this.connect();
-    // this.create("/test");
   }
 
   connect() {
-    this.client.once("connected", () => {});
     this.client.connect();
-    this.client.create("/test");
   }
+
   // COMMON
   handleError(error) {
     if (error) {
