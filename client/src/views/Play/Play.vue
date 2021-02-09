@@ -2,17 +2,21 @@
   <v-container class="container" fluid fill-height>
     <v-row class="justify-center">
       <v-col>
-        Play
+        <main-board/>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import routes from "@/router/routes";
+import MainBoard from "@/components/Play/MainBoard.vue";
+
 
 export default {
   name: "play",
+  components: {
+    "main-board": MainBoard,
+  }
 };
 </script>
 
