@@ -2,7 +2,7 @@
   <v-container class="container" fluid fill-height>
     <v-row class="justify-center">
       <v-col>
-        Login
+        <v-btn @click="juego()">Juego</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -13,6 +13,11 @@ import routes from "@/router/routes";
 
 export default {
   name: "login",
+  methods: {
+    juego() {
+      this.$router.push("/client/play");
+    }
+  }
 };
 </script>
 
