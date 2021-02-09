@@ -2,17 +2,20 @@
   <v-container class="container" fluid fill-height>
     <v-row class="justify-center">
       <v-col>
-        Play
+        <game />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import routes from "@/router/routes";
+import Game from "@/components/Play/Game.vue"
 
 export default {
   name: "play",
+  components: {
+    "game": Game
+  }
 };
 </script>
 

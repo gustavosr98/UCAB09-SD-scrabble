@@ -1,0 +1,67 @@
+<template>
+  <v-container fluid class="players">
+    <v-row justify="center" align="center">
+      <v-icon color="white">mdi-account</v-icon>
+      <p class="ml-5 mb-0">Jugadores</p>
+    </v-row>
+    <v-row justify="center" align="center" class="mt-5">
+      <v-col class="players-content pt-5">
+        <v-row
+          v-for="(p, i) in playersList"
+          :key="i"
+          justify="space-around"
+          :class="p.turn && 'players-specific'"
+          class="players-items"
+        >
+          <p class="mb-1">{{ p.id }}</p>
+          <p class="mb-1">{{ p.name }}</p>
+          <p class="mb-1">{{ p.points }}</p>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+
+export default {
+  name: "players",
+  components: {
+  },
+  props: {
+    playersList: {
+      type: Array,
+      required: true
+    }
+  },
+  data() {
+    return {
+    };
+  },
+  computed: {
+	},
+  methods: {
+	},
+  mounted() {
+  },
+};
+</script>
+
+<style scoped>
+.players {
+  color: white;
+}
+
+.players-content {
+  background-color:rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+
+.players-items {
+  font-weight: lighter;
+}
+
+.players-specific {
+  font-weight: bold;
+}
+</style>
