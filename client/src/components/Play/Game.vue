@@ -2,16 +2,17 @@
   <v-container fluid color="primary">
     <v-row justify="center" align="center">
       <v-col cols="4">
-        <v-row justify="center">
-          <v-col cols="10">
-            <v-img :src="logo" alt="Logo" class="game-logo" />
-          </v-col>
+        <v-row justify="center" class="mb-7">
+          <timer ref="timer" />
         </v-row>
-        <v-row justify="center">
-          <timer />
-        </v-row>
-        <v-row justify="center">
+        <v-row justify="center" class="mb-7">
           <players :playersList="playersList" />
+        </v-row>
+        <v-row justify="center" class="mb-7">
+          <moves :movesList="movesList" />
+        </v-row>
+        <v-row justify="center">
+          <actions ref="actions" @sendMove="sendMove" />
         </v-row>
       </v-col>
       <v-col cols="8">
@@ -24,6 +25,8 @@
 import LogoFull from "@/assets/Brand/Logo_Full.png";
 import Timer from "@/components/Play/Timer";
 import Players from "@/components/Play/Players";
+import Moves from "@/components/Play/Moves";
+import Actions from "@/components/Play/Actions";
 
 import { mapMutations } from "vuex";
 
@@ -31,7 +34,9 @@ export default {
   name: "game",
   components: {
     "timer": Timer,
-    "players": Players
+    "players": Players,
+    "moves": Moves,
+    "actions": Actions
   },
   props: {
   },
@@ -63,16 +68,51 @@ export default {
           points: 2,
           turn: false
         }
+      ],
+      movesList: [
+        {
+          id: 'P1',
+          word: 'hola',
+          points: 12,
+        },
+        {
+          id: 'P2',
+          word: 'chao',
+          points: 3,
+        },
+        {
+          id: 'P3',
+          word: 'prueba',
+          points: 12,
+        },
+        {
+          id: 'P4',
+          word: 'copa',
+          points: 2,
+        },
+        {
+          id: 'P3',
+          word: 'prueba',
+          points: 12,
+        },
+        {
+          id: 'P4',
+          word: 'copa',
+          points: 2,
+        }
       ]
     };
   },
-  computed: {
-  },
   methods: {
     ...mapMutations("ux", ["setBackgroundDark"]),
+
+    sendMove() {
+      console.log('send')
+    }
   },
   mounted() {
     this.setBackgroundDark({value: true})
+    this.$refs.timer.start()
   },
 };
 </script>

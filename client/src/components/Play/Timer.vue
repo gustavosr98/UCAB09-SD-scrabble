@@ -77,7 +77,6 @@ export default {
     }
 	},
   mounted() {
-    this.start()
   },
 };
 </script>
