@@ -9,10 +9,9 @@ export default class Repository {
   async get(id) {
     return await httpClient.get(`/${this.resourceName}/${id}`);
   }
-  async getMany(limit = 10, start = 1, resourceId) {
+  async getMany(limit = 10, page = 1) {
     return await httpClient.get(
-      `${this.resourceName}?limit=${limit}&start=${start}${resourceId &&
-        `&id=${resourceId}`}`
+      `${this.resourceName}?limit=${limit}&page=${page}`
     );
   }
   async create(resource) {
