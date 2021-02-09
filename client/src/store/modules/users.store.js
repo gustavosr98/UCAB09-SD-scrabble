@@ -7,13 +7,14 @@ const initialState = () => {
   return {
     user: "",
     users: [],
+    error: "",
   };
 };
 
 const state = initialState();
 
 const getters = {
-  get(key) {
+  get: (state) => (key) => {
     return state[key];
   },
 };
@@ -43,6 +44,7 @@ const actions = {
   async authorize({ commit }, user) {
     try {
       const response = await usersRepository.authorize(user);
+      console.log('response', response);
       jwt.saveToken(response.access_token);
       commit("set", { key: "error", value: "" });
       commit("set", { key: "user", value: response.user });
