@@ -9,8 +9,8 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
-          class="text-justify primary--text"
-          color="secondary"
+          class="text-justify white--text"
+          color="primary"
           dark
           @click="okAction"
           >{{ ok }}</v-btn

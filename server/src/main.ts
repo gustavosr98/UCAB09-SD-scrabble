@@ -29,6 +29,7 @@ async function bootstrap() {
     const config = new DocumentBuilder()
         .setTitle('Scrabble API')
         .setDescription('API REST v1.0')
+        .addTag('Users')
         .setVersion('1.0')
         .build();
     const document = SwaggerModule.createDocument(app, config);

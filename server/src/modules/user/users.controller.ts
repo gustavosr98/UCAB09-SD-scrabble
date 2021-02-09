@@ -12,7 +12,7 @@ import {
 
 import { UsersService } from './users.service';
 import { User } from '@/entities';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { LoggingControllerInterceptor } from '@/common/interceptors/logging-controller.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -44,8 +44,16 @@ export class UsersController implements CrudController<User> {
     }
 
     @Override()
-    createOne(@ParsedBody() dto: User) {
-        return this.service.create(dto);
+    @ApiBody({
+        description: 'User to create',
+        type: User,
+    })
+    @ApiCreatedResponse({
+        description: 'User created successfully',
+        type: User,
+    })
+    public async createOne(@ParsedBody() user: User): Promise<User> {
+        return await this.service.create(user);
     }
 
     @UseGuards(AuthGuard('jwt'))

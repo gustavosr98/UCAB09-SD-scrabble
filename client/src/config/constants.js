@@ -16,7 +16,7 @@ export const ERROR_CODES = Object.freeze({
   USER_NOT_FOUND:
     "El usuario no se encuentra registrado en la aplicación",
   // REGISTER
-  EMAIL_TAKEN: "El correo electrónico ya se encuentra registrado",
+  USERNAME_TAKEN: "El nombre de usuario introducido ya se encuentra registrado en la aplicación",
   // RANKING
   // PLAY
   // PROFILE

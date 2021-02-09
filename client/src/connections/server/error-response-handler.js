@@ -11,12 +11,12 @@ const errorResponseHandler = e => {
 
   store.commit("http/setNewError", error);
 
-  if (
-    e.response.status == HTTP_ERROR_CODES.FORBIDDEN ||
-    e.response.status == HTTP_ERROR_CODES.UNAUTHORIZED
-  ) {
-    router.push("/");
-  }
+  // if (
+  //   e.response.status == HTTP_ERROR_CODES.FORBIDDEN ||
+  //   e.response.status == HTTP_ERROR_CODES.UNAUTHORIZED
+  // ) {
+  //   router.push("/");
+  // }
 
   return Promise.reject(e);
 };

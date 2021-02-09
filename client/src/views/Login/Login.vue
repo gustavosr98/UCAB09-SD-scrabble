@@ -18,7 +18,7 @@
             color="white"
             class="border"
             label="Usuario"
-            maxLength="65535"
+            maxLength="50"
             outlined
           ></v-text-field>
           <v-text-field
@@ -29,7 +29,7 @@
             @click:append="showPassword = !showPassword"
             :rules="passwordRules"
             @keyup.enter="login"
-            maxLength="65535"
+            maxLength="100"
             class="border mt-1"
             dark
             outlined
