@@ -1,5 +1,8 @@
 upstream backend {
-    server 172.17.0.1:${SERVER_PORT};
+    # 172.17.0.1 docker host
+    server 10.2.126.105:3000; # gisanchez.17
+    server 10.2.126.95:3000; # jaandrade.17
+    server 10.2.126.106:3000; # avdasilvab.17
 }
 
 server {
