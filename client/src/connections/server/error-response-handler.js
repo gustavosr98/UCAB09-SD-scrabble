@@ -8,7 +8,6 @@ const errorResponseHandler = e => {
   }
 
   const error = e.response.data;
-  console.log(HTTP_ERROR_CODES, e.response, e.response.data);
 
   store.commit("http/setNewError", error);
 

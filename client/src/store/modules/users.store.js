@@ -7,13 +7,14 @@ const initialState = () => {
   return {
     user: "",
     users: [],
+    error: "",
   };
 };
 
 const state = initialState();
 
 const getters = {
-  get(key) {
+  get: (state) => (key) => {
     return state[key];
   },
 };

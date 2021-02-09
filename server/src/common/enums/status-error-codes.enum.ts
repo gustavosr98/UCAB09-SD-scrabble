@@ -1,0 +1,4 @@
+export enum StatusErrorCodes {
+    INCORRECT_PASSWORD = 'INCORRECT_PASSWORD',
+    USER_NOT_FOUND = 'USER_NOT_FOUND',
+}
