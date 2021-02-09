@@ -3,7 +3,7 @@
     <v-row class="justify-center">
       <v-col>
         Login
-        <btn @click="juego()">Juego</btn> 
+        <v-btn @click="juego()">Juego</v-btn> 
       </v-col>
     </v-row>
   </v-container>

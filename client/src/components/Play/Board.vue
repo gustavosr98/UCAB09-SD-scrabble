@@ -10,12 +10,7 @@
     </div>
   </div>
 
-  <v-container v-else >
-   <!--- <div class="score-row">
-      <h1>SCRABBLE</h1>
-      <h3>{{currentPlayer.name}}'s turn</h3>
-    </div>---->
-      
+  <v-container v-else >      
       <div>
         <v-row v-for="(row,i) in board" :key="i" class="row-justify">
           <div v-for="(cell, j) in board[i]" :key="i*15+j" @click="onBoardClick(i, j)">
@@ -53,39 +48,25 @@
             </sub>
           </v-avatar>
         </v-row>
-      </div>
-     <!--- <div class="game-board">
-        <div class="row" v-for="(row,i) in board" :key="i">
-          <div
-            class="cell"
-            @click="onBoardClick(i, j)"
-            v-for="(cell, j) in board[i]"
-            :class="{
-              'selected': cell.selected,
-              'pending': cell == selectedBoardCell,
-              'locked': cell.isLocked,
-              'start-cell': cell.effect==EFFECTS.START,
-              'triple-word': cell.effect==EFFECTS.TRIPLE_WORD,
-              'triple-letter': cell.effect==EFFECTS.TRIPLE_LETTER,
-              'double-word': cell.effect==EFFECTS.DOUBLE_WORD,
-              'double-letter': cell.effect==EFFECTS.DOUBLE_LETTER}"
-            :key="i*15+j"
-          >{{board[i][j].content}}</div>
-        </div>
-      </div>
-      <div class="game-player-two">
-        <h2>{{players[1].name}}</h2>
-        <h3>Score : {{players[1].score}}</h3>
-        <ul class="game-palette">
-          <li
+        <br/>
+        <br/>
+        <!---<v-row class="row-justify">
+          <v-avatar size="72" tile class="cell default hand mx-2"  
             @click="onHandClick(1, i)"
             v-for="(letter, i) in players[1].hand"
             :key="i"
-            class="cell"
-            :class="{'locked': (currentPlayer != players[1]),  'pending': (currentPlayer == players[1]) && i == selectedHandIndex}"
-          >{{letter}}</li>
-        </ul>
-      </div>---->
+            :class="{'locked': (currentPlayer != players[1]), 'pending': (currentPlayer == players[1]) && i == selectedHandIndex}"
+          >
+            <span>
+              {{letter}}
+            </span>
+            <sub>
+              {{letters[letter].score}}
+            </sub>
+          </v-avatar>
+        </v-row>---->
+      </div>
+      
     <button @click="cancel()">Clear</button>
     <button @click="validate()">Validate</button>
   </v-container>
@@ -93,179 +74,10 @@
 
 <script>
 import _ from "lodash";
+import {LETTERS_DESTRIBUTION, BOARD_SPECIAL_CASES, EMPTY_CELL, W3, L3, W2, L2, SS, N0} from "@/config/constants.js";
 
-const EMPTY_CELL = " ";
-
-const W3 = 4,
-  L3 = 3,
-  W2 = 2,
-  L2 = 1,
-  SS = 5,
-  N0 = 0;
-
-const BOARD_SPECIAL_CASES = [
-  [W3, N0, N0, L2, N0, N0, N0, W3, N0, N0, N0, L2, N0, N0, W3],
-  [N0, W2, N0, N0, N0, L3, N0, N0, N0, L3, N0, N0, N0, W2, N0],
-  [N0, N0, W2, N0, N0, N0, W2, N0, W2, N0, N0, N0, W2, N0, N0],
-  [L2, N0, N0, W2, N0, N0, N0, W2, N0, N0, N0, W2, N0, N0, L2],
-  [N0, N0, N0, N0, W2, N0, N0, N0, N0, N0, W2, N0, N0, N0, N0],
-  [N0, L3, N0, N0, N0, L3, N0, N0, N0, L3, N0, N0, N0, L3, N0],
-  [N0, N0, L2, N0, N0, N0, L2, N0, L2, N0, N0, N0, L2, N0, N0],
-  [W3, N0, N0, L2, N0, N0, N0, SS, N0, N0, N0, L2, N0, N0, W3],
-  [N0, N0, L2, N0, N0, N0, L2, N0, L2, N0, N0, N0, L2, N0, N0],
-  [N0, L3, N0, N0, N0, L3, N0, N0, N0, L3, N0, N0, N0, L3, N0],
-  [N0, N0, N0, N0, W2, N0, N0, N0, N0, N0, W2, N0, N0, N0, N0],
-  [L2, N0, N0, W2, N0, N0, N0, W2, N0, N0, N0, W2, N0, N0, L2],
-  [N0, N0, W2, N0, N0, N0, W2, N0, W2, N0, N0, N0, W2, N0, N0],
-  [N0, W2, N0, N0, N0, L3, N0, N0, N0, L3, N0, N0, N0, W2, N0],
-  [W3, N0, N0, L2, N0, N0, N0, W3, N0, N0, N0, L2, N0, N0, W3]
-];
-
-const LETTERS_DESTRIBUTION = {
-  A: {
-    count: 12,
-    score: 1,
-    letter: "A"
-  },
-  B: {
-    count: 2,
-    score: 3,
-    letter: "B"
-  },
-  C: {
-    count: 4,
-    score: 3,
-    letter: "C"
-  },
-  D: {
-    count: 5,
-    score: 2,
-    letter: "D"
-  },
-  E: {
-    count: 12,
-    score: 1,
-    letter: "E"
-  },
-  F: {
-    count: 1,
-    score: 4,
-    letter: "F"
-  },
-  G: {
-    count: 2,
-    score: 2,
-    letter: "G"
-  },
-  H: {
-    count: 2,
-    score: 4,
-    letter: "H"
-  },
-  CH: {
-    count: 1,
-    score: 5,
-    letter: "H"
-  },
-  I: {
-    count: 6,
-    score: 1,
-    letter: "I"
-  },
-  J: {
-    count: 1,
-    score: 8,
-    letter: "J"
-  },
-  L: {
-    count: 4,
-    score: 1,
-    letter: "L"
-  },
-  LL: {
-    count: 1,
-    score: 8,
-    letter: "LL"
-  },
-  M: {
-    count: 2,
-    score: 3,
-    letter: "M"
-  },
-  N: {
-    count: 5,
-    score: 1,
-    letter: "N"
-  },
-  Ñ: {
-    count: 1,
-    score: 8,
-    letter: "Ñ"
-  },
-  O: {
-    count: 9,
-    score: 1,
-    letter: "O"
-  },
-  P: {
-    count: 2,
-    score: 3,
-    letter: "P"
-  },
-  Q: {
-    count: 1,
-    score: 5,
-    letter: "Q"
-  },
-  R: {
-    count: 5,
-    score: 1,
-    letter: "R"
-  },
-  RR: {
-    count: 1,
-    score: 8,
-    letter: "RR"
-  },
-  S: {
-    count: 6,
-    score: 1,
-    letter: "S"
-  },
-  T: {
-    count: 4,
-    score: 1,
-    letter: "T"
-  },
-  U: {
-    count: 5,
-    score: 1,
-    letter: "U"
-  },
-  V: {
-    count: 1,
-    score: 4,
-    letter: "V"
-  },
-  X: {
-    count: 1,
-    score: 8,
-    letter: "X"
-  },
-  Y: {
-    count: 1,
-    score: 4,
-    letter: "Y"
-  },
-  Z: {
-    count: 1,
-    score: 10,
-    letter: "Z"
-  }
-};
-/*import Check from 'check-word';
-let checkWord = require('check-word');
-  let  words     = checkWord('en');*/ 
+let checkWord = require('check-if-word');
+let WORDS = checkWord('es');
  
 
 
@@ -305,6 +117,12 @@ export default {
     applyToBoard(f) {
       this.board.forEach(v => v.forEach(f));
     },
+    addLetters(letters){
+      for (let letter of letters){
+        this.board[letter.i][letter.j].content= letter.content;
+        this.board[letter.i][letter.j].isLocked= true;
+      }
+    },
     hasAdjacentCell(cell) {
       // Up
       return (
@@ -330,9 +148,10 @@ export default {
       return selectedCells;
     },
     getSelectedCellsAlignement(selectedCells) {
+      console.log(selectedCells.some(cell => this.board[cell.i][cell.j].effect == this.EFFECTS.START))
       if (
-        this.board[selectedCells[0].i][selectedCells[0].j].effect !=
-          this.EFFECTS.START &&
+        !selectedCells.some(cell => this.board[cell.i][cell.j].effect ==
+          this.EFFECTS.START) &&
         !selectedCells.some(cell => this.hasAdjacentCell(cell))
       )
         return false;
@@ -403,15 +222,17 @@ export default {
       return words;
     },
     validate() {
+      
+      this.addLetters([{i:4, j:4, content:"R"},{i:4, j:5, content:"O"},{i:4, j:6, content:"J"},{i:4, j:7, content:"O"}]);
       let selectedCells = this.getSelectedCells();
       let direction = this.getSelectedCellsAlignement(selectedCells);
       let isAligned = direction == "horizontal" || direction == "vertical";
       let words = isAligned
         ? this.getFormedWords(selectedCells, direction, this.board)
         : [];
-
+      
       let isWordValid = words.every(
-        word => !!this.wordsDict[word.toLowerCase()]
+        word =>   WORDS.check(word.toLowerCase())
       );
 
       console.log(direction, isAligned, words);
@@ -507,6 +328,7 @@ export default {
         this.insertLetter();
     },
     onBoardClick(i, j) {
+      
       // Prevent click on locked cells
       if (this.board[i][j].isLocked) return;
 
@@ -597,8 +419,8 @@ export default {
     this.generateLettersDeck();
     this.fillHands();
     this.cancel();
-   /* let ans = words.check('perro');
-    console.log("answer", ans)*/
+   let ans = WORDS.check('thfrow');
+     console.log("answer student", ans);
     // this.board[7][7].content = this.lettersDeck.pop();
     // this.board[7][7].isLocked = true;
  this.loading = false;
