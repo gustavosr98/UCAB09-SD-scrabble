@@ -32,7 +32,7 @@ export default {
     errorMessage() {
       if (this.lastError?.message) {
         return (
-          ERROR_CODES[this.lastError.statusCode] || ERROR_CODES.SERVER_ERROR
+          ERROR_CODES[this.lastError.status] || ERROR_CODES.SERVER_ERROR
         );
       } else {
         return this.lastError?.message;

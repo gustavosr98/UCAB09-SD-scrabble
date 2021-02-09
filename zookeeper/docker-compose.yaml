@@ -7,3 +7,9 @@ services:
       - 2181:2181
     environment:
       ZOO_MY_ID: 1
+  zoonavigator:
+    image: elkozmon/zoonavigator:latest
+    restart: always
+    hostname: zoonavigator
+    ports:
+      - 9000:9000

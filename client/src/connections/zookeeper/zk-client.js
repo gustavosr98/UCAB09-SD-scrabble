@@ -1,58 +1,122 @@
 var zookeeper = require("node-zookeeper-client");
+import Logger from "@/utils/logger";
+export class ZKClient {
+  #zkUrl;
+  #client;
+  #logger;
+  #timeout;
 
-export default class ZKClient {
   constructor() {
     this.basePath = "/g5";
-    this.client = zookeeper.createClient(process.env.VUE_APP_ZK_URL, {
-      sessionTimeout: process.env.VUE_APP_ZK_TIMEOUT,
+    this.#zkUrl = process.env.VUE_APP_ZK_URL;
+    this.#timeout = process.env.VUE_APP_ZK_TIMEOUT;
+
+    this.#logger = new Logger("ZKClient");
+
+    this.#client = zookeeper.createClient(this.#zkUrl, {
+      sessionTimeout: this.#timeout,
     });
 
     this.connect();
-    // this.create("/test");
   }
 
-  connect() {
-    this.client.once("connected", () => {});
-    this.client.connect();
-    this.client.create("/test");
+  // INIT
+  async connect() {
+    this.#client.connect();
+    return new Promise((resolve, reject) => {
+      this.#client.addListener("connected", () => {
+        this.#logger.info("connect", this.#zkUrl + this.basePath);
+        resolve();
+      });
+      setTimeout(() => {
+        reject("ZK TIMEOUT");
+      }, this.#timeout);
+    })
+      .then(() => {
+        this.secureBaseNode();
+      })
+      .catch(e => this.handleError(e, "connect"));
   }
+
+  async secureBaseNode() {
+    if (!(await this.exists(""))) {
+      await this.create("");
+    }
+  }
+
   // COMMON
-  handleError(error) {
+  handleError(error, method) {
     if (error) {
-      console.log(error.stack);
+      this.#logger.error(method, error);
       throw Error(error.stack);
     }
   }
 
   // NODES
-  create(path) {
-    this.client.create(this.basePath + path, function(error, path) {
-      // this.handleError(error);
+  async create(path) {
+    this.#logger.info("create", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.create(this.basePath + path, (error, path) => {
+        this.handleError(error, "create");
+        resolve();
+      });
     });
   }
 
-  getChildren(path) {
-    this.client.getChildren(this.basePath + path, (error, children, stats) => {
-      this.handleError(error);
-      console.log("Children are: %j.", children);
+  async exists(path) {
+    this.#logger.info("exists", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.exists(this.basePath + path, (error, stat) => {
+        this.handleError(error, "exists");
+        resolve(!!stat);
+      });
+    });
+  }
+
+  async getChildren(path) {
+    this.#logger.info("getChildren", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.getChildren(
+        this.basePath + path,
+        (error, children, stats) => {
+          this.handleError(error, "getChildren");
+          resolve(children);
+        }
+      );
     });
   }
 
   // DATA
-  getData(path) {
-    this.client.getData(this.basePath + path, (error, data, stat) => {
-      this.handleError(error);
-      return data;
+  async getData(path) {
+    this.#logger.info("getData", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.getData(this.basePath + path, (error, data, stat) => {
+        this.handleError(error, "getData");
+        resolve(JSON.parse(data.toString())?.v);
+      });
     });
   }
 
-  setData(path, data) {
-    this.client.getData(this.basePath + path, data, (error, data, stat) => {
-      this.handleError(error);
+  async setData(path, data) {
+    this.#logger.info("setData", path + " " + data);
+
+    return new Promise((resolve, reject) => {
+      this.#client.setData(
+        this.basePath + path,
+        Buffer.from(JSON.stringify({ v: data })),
+        (error, stat) => {
+          this.handleError(error, "setData");
+          resolve();
+        }
+      );
     });
   }
 }
 
 let zkClient = new ZKClient();
 
-export { zkClient };
+export { zkClient as default };

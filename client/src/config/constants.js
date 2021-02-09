@@ -11,12 +11,12 @@ export const ERROR_CODES = Object.freeze({
   // GLOBAL
   SERVER_ERROR: "Ocurrió un error inesperado",
   // LOGIN
-  NON_EXISTING_EMAIL: "El correo electrónico no existe",
-  NOT_MATCHING_PASSWORD: "Las contraseñas no coinciden",
-  INCORRECT_PASSWORD: "Credenciales incorrectas",
-  EMAIL_TAKEN: "El correo electrónico ya se encuentra registrado",
+  NOT_MATCHING_PASSWORD: "La contraseña introducida no coincide",
+  INCORRECT_PASSWORD: "Las credenciales que introdujo son incorrectas",
   USER_NOT_FOUND:
-    "El usuario no se encuentra registrado en la aplicación o no ha sido confirmado el correo electrónico",
+    "El usuario no se encuentra registrado en la aplicación",
+  // REGISTER
+  USERNAME_TAKEN: "El nombre de usuario introducido ya se encuentra registrado en la aplicación",
   // RANKING
   // PLAY
   // PROFILE

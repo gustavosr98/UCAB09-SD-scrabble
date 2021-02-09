@@ -7,13 +7,14 @@ const initialState = () => {
   return {
     user: "",
     users: [],
+    error: "",
   };
 };
 
 const state = initialState();
 
 const getters = {
-  get(key) {
+  get: (state) => (key) => {
     return state[key];
   },
 };
@@ -46,6 +47,15 @@ const actions = {
       jwt.saveToken(response.access_token);
       commit("set", { key: "error", value: "" });
       commit("set", { key: "user", value: response.user });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async register({ commit }, user) {
+    try {
+      const response = await usersRepository.register(user);
+      jwt.saveToken(response.access_token);
+      commit("set", { key: "error", value: "" });
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }

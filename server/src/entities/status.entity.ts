@@ -6,17 +6,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Status {
-  @PrimaryGeneratedColumn()
-  id?: number;
+    @PrimaryGeneratedColumn()
+    id?: number;
 
-  @ApiProperty()
-  @Column({ nullable: false })
-  name: string;
+    @ApiProperty()
+    @Column({ nullable: false })
+    name: string;
 
-  @ApiProperty()
-  @Column({ nullable: false })
-  description: string;
+    @ApiProperty()
+    @Column({ nullable: false })
+    description: string;
 
-  @OneToMany((type) => Game, (game) => game.status)
-  games?: Game[];
+    @OneToMany((type) => Game, (game) => game.status)
+    games?: Game[];
 }

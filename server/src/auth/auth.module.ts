@@ -18,7 +18,7 @@ import { UsersModule } from '@/modules/user/users.module';
             useFactory: async (configService: ConfigService) => ({
                 secret: configService.get('TOKEN_SECRET'),
                 signOptions: {
-                    expiresIn: configService.get('TOKEN_EXPIRATION_IN'),
+                    expiresIn: configService.get('TOKEN_EXPIRATION_TIME'),
                 },
             }),
             inject: [ConfigService],
