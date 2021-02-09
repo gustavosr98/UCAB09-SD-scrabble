@@ -36,6 +36,7 @@
           ></v-text-field>
 
           <v-row class="justify-space-between" no-gutters>
+            <p/>
             <p class="letters" @click="register">Regístrate</p>
           </v-row>
 
@@ -47,7 +48,7 @@
             color="light"
             :loading="loading"
             @keyup.enter="login"
-          >Iniciar Sesión</v-btn>
+          >Ingresar</v-btn>
         </v-form>
       </v-col>
     </v-row>
@@ -63,11 +64,11 @@ export default {
     return {
       user: "",
       userRules: [
-        v => !!v || "Debes escribir el usuario",
+        v => !!v || "Debes introducir el usuario",
       ],
       password: "",
       passwordRules: [
-        v => !!v || "Debes escribir la contrseña",
+        v => !!v || "Debes introducir la contrseña",
         v =>
           (v && v.length >= 8) ||
           "La contraseña debe tener al menos 8 caracteres",
@@ -94,12 +95,7 @@ export default {
         await this.$store.dispatch("users/authorize", user);
         this.loading = false;
         let error = this.$store.getters["users/get"]("error");
-        if (error !== "") {
-          this.snackbarError = true;
-          setTimeout(() => {
-            this.snackbarError = false;
-          }, 3000);
-        } else {
+        if (error == "") {
           this.$router.push({ name: "Ranking" });
         }
       }

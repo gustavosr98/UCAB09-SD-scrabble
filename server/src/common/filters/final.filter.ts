@@ -1,32 +1,50 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus, HttpException, Inject, NotFoundException } from '@nestjs/common';
+import {
+    ExceptionFilter,
+    Catch,
+    ArgumentsHost,
+    HttpStatus,
+    HttpException,
+    Inject,
+    BadRequestException,
+} from '@nestjs/common';
 
-import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
+import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { ScrabbleException } from '../exceptions/abstract.exception';
 
 @Catch()
 export class FinalFilter implements ExceptionFilter {
-  constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {}
+    constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {}
 
-  catch(exception: any , host: ArgumentsHost) {
-    const httpContext = host.switchToHttp();
-    const response = httpContext.getResponse();
-    const request = httpContext.getRequest();
+    catch(exception: any, host: ArgumentsHost) {
+        const httpContext = host.switchToHttp();
+        const response = httpContext.getResponse();
+        const request = httpContext.getRequest();
 
-    let status = null;
-    if (exception instanceof HttpException){ status = exception.getStatus()}
-    else if (exception instanceof EntityNotFoundError) {status = HttpStatus.NOT_FOUND}
-    else {status = HttpStatus.INTERNAL_SERVER_ERROR;}
+        const status = exception instanceof ScrabbleException ? exception.getStatusException() : 'SERVER_ERROR';
+        let httpStatus = null;
+        let message = exception instanceof ScrabbleException ? exception.getErrorMessage() : 'Unknown Error';
+       
+        if (exception instanceof HttpException) {
+            httpStatus = exception.getStatus();
+        } else if (exception instanceof EntityNotFoundError) {
+            httpStatus = HttpStatus.NOT_FOUND;
+        } else {
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
 
-    const errorResponse = {
-      message: exception.message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    };
+        const errorResponse = {
+            status,
+            scrabbleMessage: message,
+            message: exception.message,
+            timestamp: new Date().toISOString(),
+            path: request.url,
+        };
 
-    this.logger.error(`${errorResponse.path}: ` + exception.message + ' ' + exception);
+        this.logger.error(`${errorResponse.path} [${status}]: ` + exception.message + ' | ' + exception);
 
-    response.status(status).json(errorResponse);
-  }
+        response.status(httpStatus).json(errorResponse);
+    }
 }

@@ -86,7 +86,13 @@ export default {
   },
   computed: {
     userName() {
-      return "@gustavosr98";
+      let user = this.$store.getters["users/get"]("user");
+
+      if (user) {
+        return user.username;
+      }
+
+      return "usuario";
     },
   },
   methods: {

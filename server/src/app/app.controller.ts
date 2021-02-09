@@ -10,7 +10,10 @@ import { AuthService } from '@/auth/auth.service';
 @UseInterceptors(LoggingControllerInterceptor)
 @Controller()
 export class AppController {
-    constructor(private readonly appService: AppService, private readonly authService: AuthService) {}
+    constructor(
+        private readonly appService: AppService,
+        private readonly authService: AuthService,
+    ) {}
 
     @Get()
     getHello(): string {
