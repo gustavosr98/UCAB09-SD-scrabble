@@ -223,7 +223,6 @@ export default {
     },
     validate() {
       
-      this.addLetters([{i:4, j:4, content:"R"},{i:4, j:5, content:"O"},{i:4, j:6, content:"J"},{i:4, j:7, content:"O"}]);
       let selectedCells = this.getSelectedCells();
       let direction = this.getSelectedCellsAlignement(selectedCells);
       let isAligned = direction == "horizontal" || direction == "vertical";
