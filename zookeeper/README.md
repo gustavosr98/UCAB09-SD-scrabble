@@ -6,14 +6,12 @@ Inside this folder run inside a terminal the following command
 docker-compose up
 ```
 
-# Zookeeper Server UI
+This will run
 
-```
-docker run \
- -d \
- -p 9000:9000 \
- -e HTTP_PORT=9000 \
- --name zoonavigator \
- --restart unless-stopped \
- elkozmon/zoonavigator:latest
-```
+- Zookeeper Server (zoo:2181)
+- Zoonavigator UI (zoonavigator:9000)
+
+## Zookeeper Server UI
+
+Enter to localhost:9000 on a web browser
+Fill the first field with "zoo:2181"
