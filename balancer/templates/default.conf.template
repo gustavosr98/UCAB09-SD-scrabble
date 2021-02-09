@@ -1,0 +1,9 @@
+upstream backend {
+    server 172.17.0.1:${SERVER_PORT};
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
