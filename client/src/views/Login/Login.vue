@@ -85,7 +85,7 @@ export default {
     register(){
       this.$router.push({ name: "SignUp" });
     },
-    async login() {this.$router.push({ name: "Game" });
+    async login() {
       if (this.$refs.form.validate()) {
         const user = {
           username: this.user,
