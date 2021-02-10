@@ -2,10 +2,16 @@ import zkClient from "@/connections/zookeeper/zk-client";
 import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 
 import Logger from "@/utils/logger";
+const TURN_TIMER_INITIAL = 300;
 
 // Initial State object
 const initialState = () => {
   return {
+    timer: {
+      timer: null,
+      time: TURN_TIMER_INITIAL,
+      isRunning: false,
+    },
     // base
     roomId: null,
     playerId: null,
@@ -67,6 +73,13 @@ const mutations = {
   error(state, errorMessage, level = "major") {
     state.error[level] = errorMessage;
     throw new Error("[ERROR] [GameStore]: " + errorMessage);
+  },
+  // TIMER
+  resetTimer(state) {
+    clearInterval(state.timer.timer);
+    state.timer.isRunning = false;
+    state.timer.timer = null;
+    state.timer.time = TURN_TIMER_INITIAL;
   },
 };
 
@@ -140,6 +153,9 @@ const actions = {
     commit("set", toKV("playerId", user.id));
     await dispatch("loadNode");
 
+    // TEST
+    dispatch("startTurnTimer");
+
     const player = getPlayer(state, user.id);
     if (!player) {
       commit(
@@ -205,38 +221,44 @@ const actions = {
     await zkClient.removeRecursive(`/room-${state.roomId}`);
   },
   // TURN ACTIONS
-  async tellNextPlayerToPlay({ dispatch, commit, state }) {
-    const myPlayerIndex = state.players.findIndex(
-      p => p?.user.id === state.playerId
+  async tellNextPlayerToPlay({ dispatch, commit, state }, playingPlayerId) {
+    const playingPlayerIndex = state.players.findIndex(
+      p => p?.user.id === playingPlayerId
     );
     let nextPlayerId = null;
-    if (myPlayerIndex + 1 === state.players.length) {
+    if (playingPlayerIndex + 1 === state.players.length) {
       nextPlayerId = state.players.find(
-        p => !p?.wasKickedOut && p?.user.id !== state.playerId
+        p => !p?.wasKickedOut && p?.user.id !== playingPlayerId
       );
     } else {
       nextPlayerId = state.players.find(
         (p, index) =>
           !p?.wasKickedOut &&
-          p?.user.id !== state.playerId &&
-          index > myPlayerIndex
+          p?.user.id !== playingPlayerId &&
+          index > playingPlayerIndex
       );
     }
 
-    commit(
-      "set",
-      toKV("turn", {
-        ...state.turn,
-        playerId: nextPlayerId,
-      })
-    );
-
-    dispatch("updateRoom");
+    if (nextPlayerId) {
+      commit(
+        "set",
+        toKV("turn", {
+          ...state.turn,
+          playerId: nextPlayerId,
+        })
+      );
+      dispatch("updateRoom");
+    } else {
+      dispatch("reportScore", state.player);
+    }
   },
   // TURN ACTIONS / PLAY
   async sendMove(tokens /*Token[]*/) {},
   // TURN ACTIONS / PASS
-  async pass() {},
+  async pass({ dispatch, state }) {
+    // make move
+    dispatch("tellNextPlayerToPlay", state.playerId);
+  },
   // TURN ACTIONS / CHANGE_TOKENS
   async changeTokens(tokens /*Token[]*/) {},
   // ENDGAME
@@ -244,6 +266,29 @@ const actions = {
     // gameRepository.update(....)
     await dispatch("closeRoom");
   },
+  // TIMER
+  async startTurnTimer({ dispatch, commit, state }) {
+    commit("resetTimer");
+    commit("set", toKV("timer", { ...state.timer, isRunning: true }));
+
+    if (!state.timer.timer) {
+      commit(
+        "set",
+        toKV("timer", {
+          ...state.timer,
+          timer: setInterval(async () => {
+            if (state.timer.time > 0) {
+              state.timer.time--;
+            } else if (state.turn.playerId === state.playerId) {
+              await dispatch("pass");
+              commit("resetTimer");
+            }
+          }, 1000),
+        })
+      );
+    }
+  },
+
   // OTHERS
   reset({ commit }) {
     commit("reset");

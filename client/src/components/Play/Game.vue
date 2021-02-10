@@ -113,27 +113,27 @@ export default {
           turn: false
         }
       })
+    },
+    async enterRoom(){
+      if (this.userGame.isHost) {
+        await this.$store.dispatch("game/createRoom", {
+          roomId: this.game.id,
+          user: this.user,
+        });
+      } else {
+        await this.$store.dispatch("game/enterRoom", {
+          roomId: this.game.id,
+          user: this.user,
+        });
+      }
     }
   },
   async mounted() {
     this.setBackgroundDark({ value: true });
-    this.$refs.timer.start();
-
     this.game = this.$store.getters["games/get"]("game");
     this.user = this.$store.getters["users/get"]("user");
     await this.findGameInfo();
-
-    if (this.userGame.isHost) {
-      await this.$store.dispatch("game/createRoom", {
-        roomId: this.game.id,
-        user: this.user,
-      });
-    } else {
-      await this.$store.dispatch("game/enterRoom", {
-        roomId: this.game.id,
-        user: this.user,
-      });
-    }
+    await this.enterRoom();
   },
 };
 </script>
