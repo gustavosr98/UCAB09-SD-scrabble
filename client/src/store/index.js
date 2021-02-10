@@ -28,7 +28,7 @@ export default new Vuex.Store({
   // Persistent data about user encrypted
   plugins: [
     createPersistedState({
-      paths: ["users.user"],
+      paths: ["users.user", "games.game", "ux.backgroundDark"],
       storage: {
         getItem: key => ls.get(key),
         setItem: (key, value) => ls.set(key, value),
