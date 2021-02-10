@@ -60,7 +60,7 @@ export default {
         accessPassword: this.accessPassword,
         userGames: [
           {
-            totalPoints: null,
+            totalPoints: 0,
             isHost: true,
             user: {
               id: this.$store.getters["users/get"]("user").id,

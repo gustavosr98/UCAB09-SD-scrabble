@@ -51,7 +51,7 @@
             </v-btn>
           </template>
           <template v-slot:[`item.access`]="{ item }">
-            <v-btn color="primary" dark @click="accessGame(item.id)" x-small>
+            <v-btn v-if="item.access" color="primary" dark @click="accessGame(item.id)" x-small>
               <v-icon dark>mdi-door</v-icon>
             </v-btn>
           </template>
@@ -114,7 +114,7 @@ export default {
             host,
             totalUsersPlaying: game.userGames.length,
             private: !!game.accessPassword,
-            access: true,
+            access: game.userGames.length < 4,
           }
         });
   
