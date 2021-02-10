@@ -203,7 +203,6 @@ export const ROOM_STATUS = Object.freeze({
   CREATED: "CREATED",
   IN_PROGRESS: "IN_PROGRESS",
   FINISHED: "FINISHED",
-  CANCELLED: "CANCELLED",
 });
 
 export const MOVE_TYPE = Object.freeze({
