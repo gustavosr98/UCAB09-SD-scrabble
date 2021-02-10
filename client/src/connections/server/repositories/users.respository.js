@@ -12,4 +12,8 @@ export default class UsersRepository extends Repository {
   async register(payload) {
     return this.create(payload);
   }
+
+  async getRanking(limit = 10, page = 1, username = '') {
+    return await this.httpClient.get(`users/users/ranking?limit=${limit}&page=${page}&username=${username}`);
+  }
 }

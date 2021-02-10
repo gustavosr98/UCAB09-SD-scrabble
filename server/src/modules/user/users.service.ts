@@ -6,6 +6,7 @@ import { User } from '@/entities';
 import { EncryptionManagerService } from '@/encryption/encryption-manager.service';
 import { ScrabbleException } from '@/common/exceptions/abstract.exception';
 import { StatusErrorCodes } from '@/common/enums/status-error-codes.enum';
+import { CrudRequest } from '@nestjsx/crud';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<User> {
@@ -59,5 +60,39 @@ export class UsersService extends TypeOrmCrudService<User> {
 
         const newUser: User = await this.repo.save(user);
         return newUser;
+    }
+
+    public async getRanking(limit, page, username) {
+        const ranking = await this.repo.query(
+            `
+            SELECT us.username as username, us.full_name as name, SUM(ug.total_points) as points, COUNT(CASE WHEN ug.total_points > 0 THEN 1 END) as victories,  COUNT(CASE WHEN ug.total_points = 0 THEN 1 END) as defeats
+            FROM public.user us, game ga, user_game ug, status st
+            WHERE st.name = 'FINISHED'
+                AND st.id = ga.fk_status
+                AND ga.id = ug.fk_game
+                AND us.id = ug.fk_user
+                AND LOWER(us.username) LIKE '${username.toLowerCase()}%'
+            GROUP BY us.username, us.full_name
+            ORDER BY SUM(ug.total_points) DESC
+            LIMIT ${limit} OFFSET ${page};
+            `
+        );
+        const count = await this.repo.query(
+            `
+            SELECT COUNT(*)
+            FROM (
+                SELECT us.username as username, us.full_name as name, SUM(ug.total_points) as ranking, COUNT(CASE WHEN ug.total_points > 0 THEN 1 END) as victories,  COUNT(CASE WHEN ug.total_points = 0 THEN 1 END) as defeats
+                FROM public.user us, game ga, user_game ug, status st
+                WHERE st.name = 'FINISHED'
+                    AND st.id = ga.fk_status
+                    AND ga.id = ug.fk_game
+                    AND us.id = ug.fk_user
+                    AND us.username LIKE '%'
+                GROUP BY us.username, us.full_name
+                ORDER BY SUM(ug.total_points) DESC
+            ) as ranking;
+            `
+        );
+        return { ranking, count: Number(count[0].count) }
     }
 }
