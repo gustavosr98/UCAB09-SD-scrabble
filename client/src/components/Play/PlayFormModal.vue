@@ -1,11 +1,14 @@
 <template>
   <v-dialog v-model="showModal" persistent max-width="fit-content">
     <v-card class="text-center">
-      <v-card-title
-        class="headline primary justify-center py-6 word-break white--text modal-title"
-      >
-        Crear Sala
-      </v-card-title>
+      <v-card-actions class="headline primary justify-center py-6 word-break white--text modal-title">
+        <v-spacer></v-spacer>
+        <h3 >Crear Sala</h3>
+        <v-spacer></v-spacer>
+        <v-btn @click="cancelAction" class="mr-4" icon dark color="grey">
+          <v-icon dark color="white">mdi-close</v-icon>
+        </v-btn>
+      </v-card-actions>
       <v-spacer />
       <v-card-text class="mt-5 word-break">¿Desea establecer una contraseña en la sala? (Opcional)</v-card-text>
       <v-row class="justify-center">
@@ -75,6 +78,10 @@ export default {
       this.loading = false;
       this.$emit("showDialog", false);
       this.$router.push({ name: "Game" });
+    },
+    cancelAction() {
+      this.accessPassword = null
+      this.$emit("showDialog", false);
     }
   },
   mounted() {

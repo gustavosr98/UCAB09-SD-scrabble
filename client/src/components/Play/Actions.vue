@@ -46,7 +46,7 @@ export default {
   props: {
     isHost: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   data() {

@@ -65,6 +65,14 @@ const actions = {
       commit("set", { key: "error", value: e.response });
     }
   },
+  async createUserGame({ commit }, userGame) {
+    try {
+      const response = await gamesRepository.createUserGame(userGame);
+      commit("set", { key: "error", value: "" });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
   setGame({ commit }, game) {
     commit("set", { key: "game", value: game });
   },

@@ -7,6 +7,7 @@ import { EncryptionManagerService } from '@/encryption/encryption-manager.servic
 import { ScrabbleException } from '@/common/exceptions/abstract.exception';
 import { StatusErrorCodes } from '@/common/enums/status-error-codes.enum';
 import { CrudRequest } from '@nestjsx/crud';
+import { Status } from '@/common/enums/constants';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<User> {
@@ -94,5 +95,17 @@ export class UsersService extends TypeOrmCrudService<User> {
             `
         );
         return { ranking, count: Number(count[0].count) }
+    }
+
+    public async getGamesByUser(id) {
+        const query = this.repo
+            .createQueryBuilder('users')
+            .innerJoinAndSelect('users.userGames', 'userGames')
+            .innerJoinAndSelect('userGames.game', 'games')
+            .innerJoinAndSelect('games.status', 'status')
+            .andWhere(`games.status != ${Status.FINISHED}`)
+            .andWhere(`users.id = ${id}`)
+
+        return await query.getOne()
     }
 }
