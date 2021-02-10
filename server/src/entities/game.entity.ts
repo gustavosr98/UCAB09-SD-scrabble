@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { UserGame, Status } from '@/entities';
 
@@ -10,7 +10,7 @@ export class Game {
     id?: number;
 
     @ApiProperty()
-    @Column({ name: 'start_date', nullable: false })
+    @CreateDateColumn({ name: 'start_date', nullable: false })
     startDate: Date;
 
     @ApiProperty()
@@ -21,7 +21,7 @@ export class Game {
     @Column({ name: 'access_password', nullable: true })
     accessPassword?: string;
 
-    @OneToMany((type) => UserGame, (userGame) => userGame.game)
+    @OneToMany((type) => UserGame, (userGame) => userGame.game, { cascade: true })
     userGames?: UserGame[];
 
     @ManyToOne((type) => Status, (status) => status.games)
