@@ -1,4 +1,8 @@
-export const STATUS = Object.freeze({});
+export const STATUS = Object.freeze({
+  CREATED: 1,
+  IN_PROGRESS: 2,
+  FINISHED: 3,
+});
 
 export const APP_SECTIONS = Object.freeze({
   LOGIN: 1,

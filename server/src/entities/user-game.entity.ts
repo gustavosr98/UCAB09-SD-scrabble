@@ -17,10 +17,6 @@ export class UserGame {
     @Column({ name: 'is_host', nullable: false })
     isHost: boolean;
 
-    @ApiProperty()
-    @Column({ nullable: false })
-    password: string;
-
     @ManyToOne((type) => User, (user) => user.userGames)
     @JoinColumn({ name: 'fk_user' })
     user: User;
