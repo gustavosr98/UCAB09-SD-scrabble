@@ -8,6 +8,8 @@ export class ZKClient {
 
   constructor() {
     this.basePath = "/g5_team";
+    this.Event = zookeeper.Event;
+
     this.#zkUrl = process.env.VUE_APP_ZK_URL;
     this.#timeout = process.env.VUE_APP_ZK_TIMEOUT;
 
@@ -75,6 +77,21 @@ export class ZKClient {
     });
   }
 
+  async createEphemeral(path) {
+    this.#logger.info("createEphemeral", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.create(
+        this.basePath + path,
+        zookeeper.CreateMode.EPHEMERAL,
+        (error, path) => {
+          this.handleError(error, "createEphemeral");
+          resolve();
+        }
+      );
+    });
+  }
+
   async exists(path) {
     this.#logger.info("exists", path);
 
@@ -97,6 +114,17 @@ export class ZKClient {
           resolve(children);
         }
       );
+    });
+  }
+
+  async removeRecursive(path) {
+    this.#logger.info("remove", path);
+
+    return new Promise((resolve, reject) => {
+      this.#client.removeRecursive(this.basePath + path, error => {
+        this.handleError(error, "removeRecursive");
+        resolve();
+      });
     });
   }
 
