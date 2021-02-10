@@ -136,7 +136,18 @@ export default {
       await this.loadGames();
     },
     async accessGame(game) {
-      // SENDS THE USER TO THE GAME
+      const userGames = {
+        totalPoints: 0,
+        isHost: false,
+        user: {
+          id: this.$store.getters["users/get"]("user").id,
+        },
+        game: {
+          id: game.id
+        }  
+      }
+      await this.$store.dispatch("games/createUserGame", userGames);
+
       await this.$store.dispatch("games/setGame", game);
       this.$router.push({ name: "Game" });
     }
