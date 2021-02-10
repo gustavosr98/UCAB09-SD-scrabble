@@ -45,8 +45,8 @@
           no-data-text="No hay salas activas en la aplicación"
           class="elevation-1 px-0"
         >
-          <template v-slot:[`item.private`]>
-            <v-btn icon color="light" x-small>
+          <template v-slot:[`item.private`]="{ item }">
+            <v-btn v-if="item.private" icon color="light" x-small>
               <v-icon>mdi-lock</v-icon>
             </v-btn>
           </template>
@@ -126,7 +126,7 @@ export default {
       await this.loadGames();
     },
     accessGame() {
-      // SENDS THE USER TO THE GAME
+      this.$router.push({ name: "Ranking" });
     }
   },
   async mounted() {
