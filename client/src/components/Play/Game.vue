@@ -16,6 +16,7 @@
         </v-row>
       </v-col>
       <v-col cols="8">
+        <board />
       </v-col>
     </v-row>
   </v-container>
@@ -27,6 +28,7 @@ import Timer from "@/components/Play/Timer";
 import Players from "@/components/Play/Players";
 import Moves from "@/components/Play/Moves";
 import Actions from "@/components/Play/Actions";
+import Board from "@/components/Play/Board.vue";
 
 import { mapMutations } from "vuex";
 
@@ -36,7 +38,8 @@ export default {
     "timer": Timer,
     "players": Players,
     "moves": Moves,
-    "actions": Actions
+    "actions": Actions,
+    "board": Board,
   },
   props: {
   },
