@@ -135,9 +135,9 @@ export default {
       this.createDialog = value;
       await this.loadGames();
     },
-    accessGame(game) {
+    async accessGame(game) {
       // SENDS THE USER TO THE GAME
-      this.$store.dispatch("games/setGame", game);
+      await this.$store.dispatch("games/setGame", game);
       this.$router.push({ name: "Game" });
     }
   },

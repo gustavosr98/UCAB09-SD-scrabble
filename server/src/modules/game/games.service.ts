@@ -33,4 +33,8 @@ export class GamesService extends TypeOrmCrudService<Game> {
             count: games[1],
         }
     }
+
+    public async getGame(id) {
+        return await this.repo.findOne(id, { relations: ['status', 'userGames', 'userGames.user'] })
+    }
 }

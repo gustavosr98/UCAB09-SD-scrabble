@@ -2,6 +2,12 @@
   <v-container fluid>
     <v-row justify="center" align="center">
       <v-col>
+        <v-row v-if="isHost" justify="center">
+          <v-icon color="white">mdi-play</v-icon>
+          <v-col cols="10">
+            <v-btn block @click="startGame()">Empezar juego</v-btn>
+          </v-col>
+        </v-row>
         <v-row justify="center">
           <v-icon color="white">mdi-send-outline</v-icon>
           <v-col cols="10">
@@ -38,6 +44,10 @@ export default {
   components: {
   },
   props: {
+    isHost: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -47,6 +57,9 @@ export default {
   computed: {
 	},
   methods: {
+    startGame() {
+
+    },
     sendMove() {
       this.$emit("sendMove");
     },

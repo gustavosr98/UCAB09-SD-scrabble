@@ -16,4 +16,8 @@ export default class UsersRepository extends Repository {
   async getRanking(limit = 10, page = 1, username = '') {
     return await this.httpClient.get(`users/users/ranking?limit=${limit}&page=${page}&username=${username}`);
   }
+
+  async getUserGame(idUser, idGame) {
+    return await this.httpClient.get(`user-game/users/${idUser}/games/${idGame}`);
+  }
 }

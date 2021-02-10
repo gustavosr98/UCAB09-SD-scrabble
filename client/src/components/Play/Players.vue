@@ -13,8 +13,8 @@
           :class="p.turn && 'players-specific'"
           class="players-items"
         >
-          <p class="mb-1">{{ p.id }}</p>
-          <p class="mb-1">{{ p.name }}</p>
+          <p class="mb-1">{{ p.idGame }}</p>
+          <p class="mb-1">{{ p.username }}</p>
           <p class="mb-1">{{ p.points }}</p>
         </v-row>
       </v-col>

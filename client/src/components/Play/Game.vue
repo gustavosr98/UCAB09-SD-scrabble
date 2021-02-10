@@ -15,7 +15,7 @@
           <moves :movesList="movesList" />
         </v-row>
         <v-row justify="center">
-          <actions ref="actions" @sendMove="sendMove" />
+          <actions ref="actions" @sendMove="sendMove" :isHost="this.userGame.isHost" />
         </v-row>
       </v-col>
       <v-col cols="8">
@@ -49,32 +49,12 @@ export default {
   data() {
     return {
       logo: LogoFull,
-      playersList: [
-        {
-          id: 'P1',
-          name: 'jav',
-          points: 12,
-          turn: true
-        },
-        {
-          id: 'P2',
-          name: 'juan',
-          points: 3,
-          turn: false
-        },
-        {
-          id: 'P3',
-          name: 'maria',
-          points: 12,
-          turn: false
-        },
-        {
-          id: 'P4',
-          name: 'pedro',
-          points: 2,
-          turn: false
-        }
-      ],
+      userGame: {},
+      game: {},
+      user: {},
+      gameInfo: {},
+      isHost: {},
+      playersList: [],
       movesList: [
         {
           id: 'P1',
@@ -114,18 +94,35 @@ export default {
 
     sendMove() {
       this.$refs.board.validate()
+    },
+    async findGameInfo() {
+      this.userGame = await this.$store.dispatch("users/getUserGame", {idUser:this.user.id, idGame:this.game.id});
+      console.log(this.userGame)
+      this.gameInfo = await this.$store.dispatch("games/getGameWithUsers", this.game.id);
+      console.log(this.gameInfo)
+      this.setPlayers()
+    },
+    setPlayers() {
+      this.playersList = this.gameInfo.userGames.map((ug, i)  => {
+        return {
+          id: ug.user.id,
+          fullName: ug.user.fullName,
+          username: ug.user.username,
+          idGame: `P${i + 1}`,
+          points: ug.totalPoints,
+          turn: false
+        }
+      })
     }
   },
-  mounted() {
+  async mounted() {
     this.setBackgroundDark({value: true})
     this.$refs.timer.start()
 
-    const game = this.$store.getters["games/get"]("game");
-    const user = this.$store.getters["users/get"]("user");
-    console.log(game)
-    console.log(user)
+    this.game = this.$store.getters["games/get"]("game");
+    this.user = this.$store.getters["users/get"]("user");
 
-    this.$store.dispatch("games/getOne", game.id);
+    await this.findGameInfo()
   },
 };
 </script>

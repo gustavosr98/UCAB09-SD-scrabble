@@ -72,6 +72,16 @@ const actions = {
       commit("set", { key: "error", value: e.response });
     }
   },
+  async getUserGame({ commit }, {idUser, idGame}) {
+    try {
+      console.log(idUser, idGame)
+      const response = await usersRepository.getUserGame(idUser, idGame);
+      commit("set", { key: "error", value: "" });
+      return response
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
   reset({ commit }) {
     commit("reset");
   },
