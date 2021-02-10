@@ -8,9 +8,8 @@
           placeholder="value"
           v-model="value"
         ></v-text-field>
-        <v-btn @click="create">create node</v-btn>
-        <v-btn @click="setData">set value</v-btn>
-        <v-btn @click="getData">get value</v-btn>
+        <v-btn @click="test">test</v-btn>
+        <v-btn @click="createRoom">createRoom</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -18,23 +17,21 @@
 
 <script>
 import routes from "@/router/routes";
-import zkClient from "@/connections/zookeeper/zk-client";
 
 export default {
   name: "login",
   data() {
     return { key: null, value: null };
   },
-  mounted() {},
+  async mounted() {},
   methods: {
-    async create() {
-      await zkClient.create(this.key);
+    async test() {
+      await this.$store.dispatch("game/connect");
+      await this.$store.dispatch("game/exitRoom");
+      await this.$store.dispatch("game/connect");
     },
-    setData() {
-      zkClient.setData(this.key, this.value);
-    },
-    async getData() {
-      console.log(await zkClient.getData(this.key));
+    async createRoom() {
+      await this.$store.dispatch("game/createRoom", { roomId: 8, playerId: 1 });
     },
   },
 };

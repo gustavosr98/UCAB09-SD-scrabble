@@ -7,27 +7,33 @@ export class ZKClient {
   #timeout;
 
   constructor() {
-    this.basePath = "/g5";
+    this.basePath = "/g5_team";
     this.#zkUrl = process.env.VUE_APP_ZK_URL;
     this.#timeout = process.env.VUE_APP_ZK_TIMEOUT;
 
     this.#logger = new Logger("ZKClient");
-
-    this.#client = zookeeper.createClient(this.#zkUrl, {
-      sessionTimeout: this.#timeout,
-    });
-
-    this.connect();
   }
 
   // INIT
-  async connect() {
+  async connect(onConnect = () => {}, onDisconnect = () => {}) {
+    this.#client = zookeeper.createClient(this.#zkUrl, {
+      sessionTimeout: this.#timeout,
+    });
     this.#client.connect();
+
     return new Promise((resolve, reject) => {
       this.#client.addListener("connected", () => {
         this.#logger.info("connect", this.#zkUrl + this.basePath);
+        onConnect();
         resolve();
       });
+
+      this.#client.addListener("disconnected", () => {
+        this.#logger.error("disconnected", this.#zkUrl + this.basePath);
+        onDisconnect();
+        resolve();
+      });
+
       setTimeout(() => {
         reject("ZK TIMEOUT");
       }, this.#timeout);
@@ -42,6 +48,11 @@ export class ZKClient {
     if (!(await this.exists(""))) {
       await this.create("");
     }
+  }
+
+  async close() {
+    await this.#client.close();
+    this.#logger.info("close", this.#zkUrl + this.basePath);
   }
 
   // COMMON
@@ -90,14 +101,18 @@ export class ZKClient {
   }
 
   // DATA
-  async getData(path) {
+  async getData(path, getDataWatcher = () => {}) {
     this.#logger.info("getData", path);
 
     return new Promise((resolve, reject) => {
-      this.#client.getData(this.basePath + path, (error, data, stat) => {
-        this.handleError(error, "getData");
-        resolve(JSON.parse(data.toString())?.v);
-      });
+      this.#client.getData(
+        this.basePath + path,
+        getDataWatcher,
+        (error, data, stat) => {
+          this.handleError(error, "getData");
+          resolve(JSON.parse(data.toString())?.v);
+        }
+      );
     });
   }
 

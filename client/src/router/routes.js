@@ -4,6 +4,7 @@ const routesRaw = Object.freeze({
   LOGIN: {
     path: "/",
     name: "Login",
+    redirect: "/test/zk",
     component: () =>
       import(/* webpackChunkName: "login" */ "@/views/Login/Login"),
     meta: {
@@ -19,6 +20,15 @@ const routesRaw = Object.freeze({
     meta: {
       clientGuest: true,
       app_section: APP_SECTIONS.LOGIN,
+    },
+  },
+  TEST: {
+    path: "/test/zk",
+    name: "Zookeeper",
+    component: () =>
+      import(/* webpackChunkName: "zk" */ "@/views/Test/Zookeeper"),
+    meta: {
+      clientGuest: true,
     },
   },
   DASHBOARD: {
