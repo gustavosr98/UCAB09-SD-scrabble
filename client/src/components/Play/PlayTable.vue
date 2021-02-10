@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="games-table">
     <v-row justify="space-around" class="pt-0">
       <v-col cols="12" sm="3" class="pl-0 mt-10">
         <h2 class="font-weight-light d-flex justify-start">Lista de Salas</h2>
@@ -148,26 +148,39 @@ export default {
       }
       await this.$store.dispatch("games/createUserGame", userGames);
 
-      await this.$store.dispatch("games/setGame", game);
+      this.$store.commit("games/set", { key: "game", value: game });
       this.$router.push({ name: "Game" });
+    },
+    async validateGame() {
+      const userGame = await this.$store.dispatch("users/getGamesByUser", {id: this.$store.getters["users/get"]("user").id})
+      if (userGame) {
+        this.$store.commit("games/set", { key: "game", value: userGame.userGames[0].game });
+        this.$router.push({ name: "Game" });
+      }
     }
   },
   watch: {
     options: {
       async handler() {
-        await this.loadGames();
+        await this.loadGames(); 
       },
       deep: true,
     },
   },
   async mounted() {
-    this.setBackgroundDark({value: false})
+    await this.validateGame()
     await this.loadGames();
+  },
+  created() {
+    this.setBackgroundDark({value: false})
   }
 };
 </script>
 
 <style scope>
+.games-table {
+  background-color: white;
+}
 .rounded-corner {
   border-radius: 10px;
 }

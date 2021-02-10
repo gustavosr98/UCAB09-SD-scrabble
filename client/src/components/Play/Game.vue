@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid color="primary">
+  <v-container fluid>
     <v-row justify="center">
       <v-col cols="4">
         <v-row justify="center" class="mb-7">
@@ -119,8 +119,10 @@ export default {
     this.setBackgroundDark({ value: true });
     this.$refs.timer.start();
 
-    this.game = this.$store.getters["games/get"]("game");
     this.user = this.$store.getters["users/get"]("user");
+    this.game = this.$store.getters["games/get"]("game");
+    console.log(this.user)
+    console.log(this.game)
     await this.findGameInfo();
 
     if (this.userGame.isHost) {

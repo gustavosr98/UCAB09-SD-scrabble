@@ -20,4 +20,8 @@ export default class UsersRepository extends Repository {
   async getUserGame(idUser, idGame) {
     return await this.httpClient.get(`user-game/users/${idUser}/games/${idGame}`);
   }
+
+  async getGamesByUser(id) {
+    return await this.httpClient.get(`users/${id}/user-games`);
+  }
 }

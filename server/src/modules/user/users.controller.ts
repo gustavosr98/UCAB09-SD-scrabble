@@ -80,4 +80,10 @@ export class UsersController implements CrudController<User> {
     async getRanking(@Query('limit') limit, @Query('page') page, @Query('username') username) {
         return await this.service.getRanking(Number(limit), page, username)
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id/user-games')
+    async getGamesByUser(@Param('id') id) {
+        return await this.service.getGamesByUser(id)
+    }
 }
