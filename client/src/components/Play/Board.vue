@@ -1,13 +1,6 @@
 <template>
   <div v-if="loading" id="loader" class="d-flex justify-content-center loader">
-    <div class="loader-dots">
-      <div class="loader-dots-dot dot1"></div>
-      <div class="loader-dots-dot dot2"></div>
-      <div class="loader-dots-dot dot3"></div>
-    </div>
-    <div class="loader-text">
-      <h5>Loading dictionnary...</h5>
-    </div>
+    <v-progress-circular class="loader-dots" size="70" indeterminate color="primary"></v-progress-circular>
   </div>
 
   <v-container v-else >      
@@ -48,23 +41,6 @@
             </sub>
           </v-avatar>
         </v-row>
-        <br/>
-        <br/>
-        <!---<v-row class="row-justify">
-          <v-avatar size="72" tile class="cell default hand mx-2"  
-            @click="onHandClick(1, i)"
-            v-for="(letter, i) in players[1].hand"
-            :key="i"
-            :class="{'locked': (currentPlayer != players[1]), 'pending': (currentPlayer == players[1]) && i == selectedHandIndex}"
-          >
-            <span>
-              {{letter}}
-            </span>
-            <sub>
-              {{letters[letter].score}}
-            </sub>
-          </v-avatar>
-        </v-row>---->
       </div>
       
     <button @click="cancel()">Clear</button>
@@ -418,11 +394,11 @@ export default {
     this.generateLettersDeck();
     this.fillHands();
     this.cancel();
-   let ans = WORDS.check('thfrow');
+    let ans = WORDS.check('thfrow');
      console.log("answer student", ans);
     // this.board[7][7].content = this.lettersDeck.pop();
     // this.board[7][7].isLocked = true;
- this.loading = false;
+    this.loading = false;
    /* fetch(`words_dictionary.json`)
       .then(res => res.json())
       .then(res => {
