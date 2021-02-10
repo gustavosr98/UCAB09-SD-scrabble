@@ -7,6 +7,8 @@ const initialState = () => {
   return {
     user: "",
     users: [],
+    ranking: [],
+    countRanking: 0,
     error: "",
   };
 };
@@ -56,6 +58,16 @@ const actions = {
       const response = await usersRepository.register(user);
       jwt.saveToken(response.access_token);
       commit("set", { key: "error", value: "" });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async getRanking({ commit }, { limit, page, username }) {
+    try {
+      const response = await usersRepository.getRanking(limit, page, username);
+      commit("set", { key: "error", value: "" });
+      commit("set", { key: "ranking", value: response.ranking });
+      commit("set", { key: "countRanking", value: response.count });
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }
