@@ -1,7 +1,10 @@
 <template>
   <v-container fluid color="primary">
-    <v-row justify="center" align="center">
+    <v-row justify="center">
       <v-col cols="4">
+        <v-row justify="center" class="mb-7">
+          <v-img :src="logo" alt="Logo" class="logo" />
+        </v-row>
         <v-row justify="center" class="mb-7">
           <timer ref="timer" />
         </v-row>
@@ -16,7 +19,7 @@
         </v-row>
       </v-col>
       <v-col cols="8">
-        <board />
+        <board ref="board" />
       </v-col>
     </v-row>
   </v-container>
@@ -110,7 +113,7 @@ export default {
     ...mapMutations("ux", ["setBackgroundDark"]),
 
     sendMove() {
-      console.log('send')
+      this.$refs.board.validate()
     }
   },
   mounted() {

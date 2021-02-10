@@ -68,7 +68,6 @@
       </div>
       
     <button @click="cancel()">Clear</button>
-    <button @click="validate()">Validate</button>
   </v-container>
 </template>
 
