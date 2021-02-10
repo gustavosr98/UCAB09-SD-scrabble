@@ -12,4 +12,8 @@ export default class GamesRepository extends Repository {
   async createGame(game) {
     return this.create(game);
   }
+
+  async getGame(id) {
+    return this.get(id);
+  }
 }

@@ -52,6 +52,15 @@ const routesRaw = Object.freeze({
         },
       },
       {
+        path: "/client/play/game",
+        name: "Game",
+        component: () =>
+          import(/* webpackChunkName: "play" */ "@/views/Play/Game"),
+        meta: {
+          app_section: APP_SECTIONS.PLAY,
+        },
+      },
+      {
         path: "/client/profile",
         name: "Profile",
         component: () =>

@@ -52,7 +52,9 @@ export default {
     },
     take() {},
     pass() {},
-    goOut() {}
+    goOut() {
+      this.$router.push({ name: "Play" });
+    }
 	},
   mounted() {
   },

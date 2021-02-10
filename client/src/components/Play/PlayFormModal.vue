@@ -54,13 +54,13 @@ export default {
     }
   },
   methods: {
-    create() {
+    async create() {
       this.loading = true;
       const game = { 
         accessPassword: this.accessPassword,
         userGames: [
           {
-            totalPoints: null,
+            totalPoints: 0,
             isHost: true,
             user: {
               id: this.$store.getters["users/get"]("user").id,
@@ -71,9 +71,10 @@ export default {
           id: STATUS.CREATED 
         },
       }
-      this.$store.dispatch("games/create", game);
+      await this.$store.dispatch("games/create", game);
       this.loading = false;
       this.$emit("showDialog", false);
+      this.$router.push({ name: "Game" });
     }
   },
   mounted() {

@@ -2,19 +2,19 @@
   <v-container class="container" fluid fill-height>
     <v-row class="justify-center">
       <v-col>
-        <play-table />
+        <game />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import PlayTable from "@/components/Play/PlayTable.vue";
+import Game from "@/components/Play/Game.vue"
 
 export default {
   name: "play",
   components: {
-    "play-table": PlayTable,
+    "game": Game,
   },
 };
 </script>

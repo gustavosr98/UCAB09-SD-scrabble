@@ -44,14 +44,16 @@
           :loading="loading"
           no-data-text="No hay salas activas en la aplicación"
           class="elevation-1 px-0"
+          :options.sync="options"
+          :server-items-length="count"
         >
-          <template v-slot:[`item.private`]>
-            <v-btn icon color="light" x-small>
+          <template v-slot:[`item.private`]="{ item }">
+            <v-btn v-if="item.private" icon color="light" x-small>
               <v-icon>mdi-lock</v-icon>
             </v-btn>
           </template>
           <template v-slot:[`item.access`]="{ item }">
-            <v-btn color="primary" dark @click="accessGame(item.id)" x-small>
+            <v-btn color="primary" dark @click="accessGame(item)" x-small>
               <v-icon dark>mdi-door</v-icon>
             </v-btn>
           </template>
@@ -67,6 +69,7 @@
 
 <script>
 import PlayFormModal from "./PlayFormModal.vue";
+import { mapMutations } from "vuex";
 
 export default {
   name: "play-table",
@@ -88,9 +91,12 @@ export default {
         { text: "Privado", value: "private", align: "center" },
         { text: "Entrar", align: "start", sortable: false, value: "access" },
       ],
+      count: 0,
+      options: {},
     }
   },
   methods: {
+    ...mapMutations("ux", ["setBackgroundDark"]),
     async refreshContent() {
       this.search = "";
       this.limit = 10;
@@ -99,11 +105,15 @@ export default {
     },
     async loadGames() {
       this.loading = true;
-      await this.$store.dispatch("games/getMany", { limit: this.limit, page: this.page });
+
+      const { page, itemsPerPage } = this.options;
+
+      await this.$store.dispatch("games/getMany", { limit: page * itemsPerPage, page: (page - 1) * itemsPerPage });
 
       const games = this.$store.getters["games/get"]("games");
 
       if (games.data) {
+        this.count = games.count
         this.items = games.data.map((game) => {
           const hostFound = game.userGames.find((userGame) => userGame.isHost === true);
           
@@ -125,11 +135,22 @@ export default {
       this.createDialog = value;
       await this.loadGames();
     },
-    accessGame() {
+    accessGame(game) {
       // SENDS THE USER TO THE GAME
+      this.$store.dispatch("games/setGame", game);
+      this.$router.push({ name: "Game" });
     }
   },
+  watch: {
+    options: {
+      async handler() {
+        await this.loadGames();
+      },
+      deep: true,
+    },
+  },
   async mounted() {
+    this.setBackgroundDark({value: false})
     await this.loadGames();
   }
 };

@@ -119,6 +119,13 @@ export default {
   mounted() {
     this.setBackgroundDark({value: true})
     this.$refs.timer.start()
+
+    const game = this.$store.getters["games/get"]("game");
+    const user = this.$store.getters["users/get"]("user");
+    console.log(game)
+    console.log(user)
+
+    this.$store.dispatch("games/getOne", game.id);
   },
 };
 </script>
