@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
     Crud,
     CrudAuth,
@@ -72,5 +72,12 @@ export class UsersController implements CrudController<User> {
     @Override()
     async deleteOne(@ParsedRequest() req: CrudRequest) {
         return this.base.deleteOneBase(req);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @UseInterceptors(CrudRequestInterceptor)
+    @Get('users/ranking')
+    async getRanking(@Query('limit') limit, @Query('page') page, @Query('username') username) {
+        return await this.service.getRanking(Number(limit), page, username)
     }
 }
