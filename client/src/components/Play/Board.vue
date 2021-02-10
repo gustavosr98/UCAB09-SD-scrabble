@@ -42,8 +42,6 @@
           </v-avatar>
         </v-row>
       </div>
-      
-    <button @click="cancel()">Clear</button>
   </v-container>
 </template>
 
