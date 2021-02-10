@@ -10,16 +10,12 @@ export class UserGame {
     id?: number;
 
     @ApiProperty()
-    @Column({ name: 'total_points', nullable: true })
-    totalPoints?: string;
+    @Column({ name: 'total_points', nullable: false })
+    totalPoints: number;
 
     @ApiProperty()
     @Column({ name: 'is_host', nullable: false })
     isHost: boolean;
-
-    @ApiProperty()
-    @Column({ nullable: false })
-    password: string;
 
     @ManyToOne((type) => User, (user) => user.userGames)
     @JoinColumn({ name: 'fk_user' })
