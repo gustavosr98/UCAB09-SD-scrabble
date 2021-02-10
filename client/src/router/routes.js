@@ -21,6 +21,15 @@ const routesRaw = Object.freeze({
       app_section: APP_SECTIONS.LOGIN,
     },
   },
+  TEST: {
+    path: "/test/zk",
+    name: "Zookeeper",
+    component: () =>
+      import(/* webpackChunkName: "zk" */ "@/views/Test/Zookeeper"),
+    meta: {
+      clientGuest: true,
+    },
+  },
   DASHBOARD: {
     path: "/client",
     name: "Layout",
@@ -47,6 +56,15 @@ const routesRaw = Object.freeze({
         name: "Play",
         component: () =>
           import(/* webpackChunkName: "play" */ "@/views/Play/Play"),
+        meta: {
+          app_section: APP_SECTIONS.PLAY,
+        },
+      },
+      {
+        path: "/client/play/game",
+        name: "Game",
+        component: () =>
+          import(/* webpackChunkName: "play" */ "@/views/Play/Game"),
         meta: {
           app_section: APP_SECTIONS.PLAY,
         },

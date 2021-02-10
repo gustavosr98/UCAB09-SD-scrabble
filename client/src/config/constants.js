@@ -1,4 +1,8 @@
-export const STATUS = Object.freeze({});
+export const STATUS = Object.freeze({
+  CREATED: 1,
+  IN_PROGRESS: 2,
+  FINISHED: 3,
+});
 
 export const APP_SECTIONS = Object.freeze({
   LOGIN: 1,
@@ -11,12 +15,12 @@ export const ERROR_CODES = Object.freeze({
   // GLOBAL
   SERVER_ERROR: "Ocurrió un error inesperado",
   // LOGIN
-  NON_EXISTING_EMAIL: "El correo electrónico no existe",
-  NOT_MATCHING_PASSWORD: "Las contraseñas no coinciden",
-  INCORRECT_PASSWORD: "Credenciales incorrectas",
-  EMAIL_TAKEN: "El correo electrónico ya se encuentra registrado",
-  USER_NOT_FOUND:
-    "El usuario no se encuentra registrado en la aplicación o no ha sido confirmado el correo electrónico",
+  NOT_MATCHING_PASSWORD: "La contraseña introducida no coincide",
+  INCORRECT_PASSWORD: "Las credenciales que introdujo son incorrectas",
+  USER_NOT_FOUND: "El usuario no se encuentra registrado en la aplicación",
+  // REGISTER
+  USERNAME_TAKEN:
+    "El nombre de usuario introducido ya se encuentra registrado en la aplicación",
   // RANKING
   // PLAY
   // PROFILE
@@ -27,150 +31,149 @@ export const HTTP_ERROR_CODES = Object.freeze({
   UNAUTHORIZED: 401,
 });
 
-
-
 export const LETTERS_DESTRIBUTION = Object.freeze({
   A: {
     count: 12,
     score: 1,
-    letter: "A"
+    letter: "A",
   },
   B: {
     count: 2,
     score: 3,
-    letter: "B"
+    letter: "B",
   },
   C: {
     count: 4,
     score: 3,
-    letter: "C"
+    letter: "C",
   },
   D: {
     count: 5,
     score: 2,
-    letter: "D"
+    letter: "D",
   },
   E: {
     count: 12,
     score: 1,
-    letter: "E"
+    letter: "E",
   },
   F: {
     count: 1,
     score: 4,
-    letter: "F"
+    letter: "F",
   },
   G: {
     count: 2,
     score: 2,
-    letter: "G"
+    letter: "G",
   },
   H: {
     count: 2,
     score: 4,
-    letter: "H"
+    letter: "H",
   },
   CH: {
     count: 1,
     score: 5,
-    letter: "H"
+    letter: "H",
   },
   I: {
     count: 6,
     score: 1,
-    letter: "I"
+    letter: "I",
   },
   J: {
     count: 1,
     score: 8,
-    letter: "J"
+    letter: "J",
   },
   L: {
     count: 4,
     score: 1,
-    letter: "L"
+    letter: "L",
   },
   LL: {
     count: 1,
     score: 8,
-    letter: "LL"
+    letter: "LL",
   },
   M: {
     count: 2,
     score: 3,
-    letter: "M"
+    letter: "M",
   },
   N: {
     count: 5,
     score: 1,
-    letter: "N"
+    letter: "N",
   },
   Ñ: {
     count: 1,
     score: 8,
-    letter: "Ñ"
+    letter: "Ñ",
   },
   O: {
     count: 9,
     score: 1,
-    letter: "O"
+    letter: "O",
   },
   P: {
     count: 2,
     score: 3,
-    letter: "P"
+    letter: "P",
   },
   Q: {
     count: 1,
     score: 5,
-    letter: "Q"
+    letter: "Q",
   },
   R: {
     count: 5,
     score: 1,
-    letter: "R"
+    letter: "R",
   },
   RR: {
     count: 1,
     score: 8,
-    letter: "RR"
+    letter: "RR",
   },
   S: {
     count: 6,
     score: 1,
-    letter: "S"
+    letter: "S",
   },
   T: {
     count: 4,
     score: 1,
-    letter: "T"
+    letter: "T",
   },
   U: {
     count: 5,
     score: 1,
-    letter: "U"
+    letter: "U",
   },
   V: {
     count: 1,
     score: 4,
-    letter: "V"
+    letter: "V",
   },
   X: {
     count: 1,
     score: 8,
-    letter: "X"
+    letter: "X",
   },
   Y: {
     count: 1,
     score: 4,
-    letter: "Y"
+    letter: "Y",
   },
   Z: {
     count: 1,
     score: 10,
-    letter: "Z"
-  }
+    letter: "Z",
+  },
 });
+
 export const W3 = 4,
   L3 = 3,
   W2 = 2,
@@ -194,5 +197,17 @@ export const BOARD_SPECIAL_CASES = Object.freeze([
   [L2, N0, N0, W2, N0, N0, N0, W2, N0, N0, N0, W2, N0, N0, L2],
   [N0, N0, W2, N0, N0, N0, W2, N0, W2, N0, N0, N0, W2, N0, N0],
   [N0, W2, N0, N0, N0, L3, N0, N0, N0, L3, N0, N0, N0, W2, N0],
-  [W3, N0, N0, L2, N0, N0, N0, W3, N0, N0, N0, L2, N0, N0, W3]
+  [W3, N0, N0, L2, N0, N0, N0, W3, N0, N0, N0, L2, N0, N0, W3],
 ]);
+export const ROOM_STATUS = Object.freeze({
+  CREATED: "CREATED",
+  IN_PROGRESS: "IN_PROGRESS",
+  FINISHED: "FINISHED",
+  CANCELLED: "CANCELLED",
+});
+
+export const MOVE_TYPE = Object.freeze({
+  PLAY: "PLAY",
+  PASS: "PASS",
+  CHANGE_TOKENS: "CHANGE_TOKENS",
+});

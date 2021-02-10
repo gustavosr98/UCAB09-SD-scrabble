@@ -8,16 +8,15 @@ const errorResponseHandler = e => {
   }
 
   const error = e.response.data;
-  console.log(HTTP_ERROR_CODES, e.response, e.response.data);
 
   store.commit("http/setNewError", error);
 
-  if (
-    e.response.status == HTTP_ERROR_CODES.FORBIDDEN ||
-    e.response.status == HTTP_ERROR_CODES.UNAUTHORIZED
-  ) {
-    router.push("/");
-  }
+  // if (
+  //   e.response.status == HTTP_ERROR_CODES.FORBIDDEN ||
+  //   e.response.status == HTTP_ERROR_CODES.UNAUTHORIZED
+  // ) {
+  //   router.push("/");
+  // }
 
   return Promise.reject(e);
 };

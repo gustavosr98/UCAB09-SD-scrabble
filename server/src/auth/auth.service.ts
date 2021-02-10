@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -6,6 +6,8 @@ import { Logger } from 'winston';
 import { UsersService } from '@/modules/user/users.service';
 import { User } from '@/entities';
 import { EncryptionManagerService } from '@/encryption/encryption-manager.service';
+import { ScrabbleException } from '@/common/exceptions/abstract.exception';
+import { StatusErrorCodes } from '@/common/enums/status-error-codes.enum';
 
 @Injectable()
 export class AuthService {
@@ -34,8 +36,10 @@ export class AuthService {
         const user: User = await this.usersService.getUserByUsername(username);
 
         if (!user) {
-            throw new UnauthorizedException(
-                'El usuario no se encuentra registrado',
+            throw new ScrabbleException(
+                'El usuario no se encuentra registrado en la aplicación',
+                HttpStatus.BAD_REQUEST,
+                StatusErrorCodes.USER_NOT_FOUND,
             );
         }
 
@@ -48,8 +52,10 @@ export class AuthService {
         );
 
         if (!correctPassword) {
-            throw new UnauthorizedException(
+            throw new ScrabbleException(
                 'La combinación de correo electrónico y contraseña es incorrecta',
+                HttpStatus.UNAUTHORIZED,
+                StatusErrorCodes.INCORRECT_PASSWORD,
             );
         }
 
@@ -61,8 +67,13 @@ export class AuthService {
      * Genera el payload del token y lo firma de acuerdo a la configuración del módulo auth
      * @param user Partial<User>
      */
-    public async login(user: Partial<User>): Promise<{ access_token: string; user: Partial<User> }> {
-        this.log.debug(`login: generating token for=${user.id}|username=${user.username}]`, this.logMetadata);
+    public async login(
+        user: Partial<User>,
+    ): Promise<{ access_token: string; user: Partial<User> }> {
+        this.log.debug(
+            `login: generating token for=${user.id}|username=${user.username}]`,
+            this.logMetadata,
+        );
         const payload = { id: user.id, username: user.username };
         return {
             access_token: this.jwtService.sign(payload),

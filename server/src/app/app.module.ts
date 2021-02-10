@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { indexModules } from '../modules/indexModule'
+import { indexModules } from '../modules/indexModule';
 
 // CONFIGURATION
 import configuration from '@/configuration';
@@ -21,18 +21,18 @@ import { AppService } from '@/app/app.service';
 import { AuthModule } from '@/auth/auth.module';
 
 @Module({
-  imports: [
-    ...indexModules,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: ['.env'],
-      load: [configuration],
-    }),
-    AuthModule,
-    DatabaseModule,
-    WinstonModule.forRoot(createOptions({ fileName: 'main' })),
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ...indexModules,
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: ['.env'],
+            load: [configuration],
+        }),
+        AuthModule,
+        DatabaseModule,
+        WinstonModule.forRoot(createOptions({ fileName: 'main' })),
+    ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}

@@ -1,0 +1,7 @@
+balancer:
+  image: nginx
+  volumes:
+    - ./templates:/etc/nginx/templates
+    - ./entrypoint.sh:/entrypoint.sh
+  ports:
+    - "5000:80"

@@ -7,9 +7,9 @@ import { User } from '@/entities';
 import { EncryptionModule } from '@/encryption/encryption.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), EncryptionModule],
-  providers: [UsersService],
-  controllers: [UsersController],
-  exports: [UsersService]
+    imports: [TypeOrmModule.forFeature([User]), EncryptionModule],
+    providers: [UsersService],
+    controllers: [UsersController],
+    exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

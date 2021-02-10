@@ -7,13 +7,16 @@ const initialState = () => {
   return {
     user: "",
     users: [],
+    ranking: [],
+    countRanking: 0,
+    error: "",
   };
 };
 
 const state = initialState();
 
 const getters = {
-  get(key) {
+  get: (state) => (key) => {
     return state[key];
   },
 };
@@ -46,6 +49,35 @@ const actions = {
       jwt.saveToken(response.access_token);
       commit("set", { key: "error", value: "" });
       commit("set", { key: "user", value: response.user });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async register({ commit }, user) {
+    try {
+      const response = await usersRepository.register(user);
+      jwt.saveToken(response.access_token);
+      commit("set", { key: "error", value: "" });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async getRanking({ commit }, { limit, page, username }) {
+    try {
+      const response = await usersRepository.getRanking(limit, page, username);
+      commit("set", { key: "error", value: "" });
+      commit("set", { key: "ranking", value: response.ranking });
+      commit("set", { key: "countRanking", value: response.count });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async getUserGame({ commit }, {idUser, idGame}) {
+    try {
+      console.log(idUser, idGame)
+      const response = await usersRepository.getUserGame(idUser, idGame);
+      commit("set", { key: "error", value: "" });
+      return response
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }
