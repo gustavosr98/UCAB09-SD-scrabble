@@ -123,6 +123,7 @@ const actions = {
   async getData({ dispatch, commit }) {
     const room = await zkClient.getData(`/room-${state.roomId}`, event => {
       if (zkClient.Event.NODE_DATA_CHANGED === event.getType()) {
+        dispatch("checkGameover");
         dispatch("getData");
       }
     });
@@ -195,8 +196,10 @@ const actions = {
     }
   },
   async closeDoorAndStartGame({ dispatch, commit, state }) {
+    await gamesRepository.updateGameStatus(state.userGame.game.id, 2);
+    commit("set", toKV("status", ROOM_STATUS.IN_PROGRESS));
+    dispatch("updateRoom");
     await dispatch("startTurnTimer");
-    await dispatch("startKickOutTimer");
   },
   async updateRoom({ state }) {
     await zkClient.setData(`/room-${state.roomId}`, {
@@ -268,9 +271,6 @@ const actions = {
       await gamesRepository.delete(state.roomId);
     }
   },
-  async closeRoom({ state }) {
-    await zkClient.removeRecursive(`/room-${state.roomId}`);
-  },
   // TURN ACTIONS
   async tellNextPlayerToPlay({ dispatch, commit, state }, playingPlayerId) {
     const playingPlayerIndex = state.players.findIndex(
@@ -319,16 +319,23 @@ const actions = {
   },
   // ENDGAME
   async checkGameover({ dispatch }) {
-    const twoRoundsPassing = true;
-    const imWinner = true;
+    const twoRoundsPassing = false; /* hacer */
+    const imWinner = false; /* hacer */
     if (twoRoundsPassing && imWinner) {
       await dispatch("reportScore");
     }
   },
-  async reportScore({ dispatch, state }) {
+  async reportScore({ dispatch, commit, state }) {
     console.log(state.userGame);
-    // gameRepository.update(....)
-    await dispatch("closeRoom");
+    commit("set", toKV("status", ROOM_STATUS.FINISHED));
+    dispatch("updateRoom");
+    await gamesRepository.updateGameStatus(state.userGame.game.id, 3);
+    await gamesRepository.updateUserGame(state.userGame.id, {
+      totalPoints: 100 /* cambiar */,
+      isHost: state.userGame.isHost,
+      wasKickedOut: false,
+    });
+    // await zkClient.removeRecursive(`/room-${state.roomId}`);
   },
   // TIMER
   async startTurnTimer({ dispatch, commit, state }) {

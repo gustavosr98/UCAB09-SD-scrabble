@@ -18,7 +18,10 @@ export default class Repository {
     return await httpClient.post(this.resourceName, resource);
   }
   async update(resource) {
-    return await httpClient.patch(this.resourceName, resource);
+    return await httpClient.patch(
+      `/${this.resourceName}/${resource?.id}`,
+      resource
+    );
   }
   async delete(resourceId) {
     return await httpClient.delete(`/${this.resourceName}/${resourceId}`);

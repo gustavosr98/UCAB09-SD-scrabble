@@ -7,7 +7,7 @@
           <v-col cols="10">
             <v-btn
               block
-              @click="$store.game.dispatch.closeDoorAndStartGame()"
+              @click="$store.dispatch('game/closeDoorAndStartGame')"
               :disabled="isGameInProgress"
               >Empezar juego</v-btn
             >

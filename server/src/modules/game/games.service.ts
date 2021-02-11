@@ -26,15 +26,21 @@ export class GamesService extends TypeOrmCrudService<Game> {
             .andWhere(`games.status = ${Status.CREATED}`)
             .skip(start)
             .take(limit);
-        
+
         const games: [Game[], number] = await query.getManyAndCount();
         return {
             data: games[0],
             count: games[1],
-        }
+        };
     }
 
     public async getGame(id) {
-        return await this.repo.findOne(id, { relations: ['status', 'userGames', 'userGames.user'] })
+        return await this.repo.findOne(id, {
+            relations: ['status', 'userGames', 'userGames.user'],
+        });
+    }
+
+    public async updateGameStatus(id: number, statusId: number) {
+        return await this.repo.update(id, { status: { id: statusId } });
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Crud, CrudController, CrudRequest, Override, ParsedRequest } from '@nestjsx/crud';
 
 import { Game } from '@/entities';
@@ -20,18 +20,18 @@ import { GamesService } from './games.service';
 export class GamesController implements CrudController<Game> {
     constructor(public service: GamesService) {}
 
-    @UseGuards(AuthGuard('jwt'))
     @Override()
-    getMany(
-        @Query('limit') limit: number = 10,
-        @Query('start') start: number = 1,
-    ) {
-        return this.service.getGames({ limit, start });
+    async getMany(@Query('limit') limit: number = 10, @Query('start') start: number = 1) {
+        return await this.service.getGames({ limit, start });
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Get(':id/users')
     async getGame(@Param('id') id) {
-        return await this.service.getGame(id)
+        return await this.service.getGame(id);
+    }
+
+    @Patch(':id/status/:statusId')
+    async updateGameStatus(@Param('id') id: number, @Param('statusId') statusId: number) {
+        return await this.service.updateGameStatus(id, statusId);
     }
 }
