@@ -64,22 +64,31 @@
       :showModal="createDialog"
       @showDialog="showDialog"
     />
+    <ValidatePasswordModal
+      :showModal="createValidateDialog"
+      :accessPassword="accessPassword"
+      @redirectToGame="redirectToGame"
+      @showDialog="showValidateDialog"
+    />
   </v-container>
 </template>
 
 <script>
 import PlayFormModal from "./PlayFormModal.vue";
+import ValidatePasswordModal from "./ValidatePasswordModal.vue";
 import { mapMutations } from "vuex";
 
 export default {
   name: "play-table",
   components: {
-    PlayFormModal
+    PlayFormModal,
+    ValidatePasswordModal
   },
   data() {
     return {
       loading: false,
       createDialog: false,
+      createValidateDialog: false,
       items: [],
       search: "",
       limit: 10,
@@ -93,6 +102,8 @@ export default {
       ],
       count: 0,
       options: {},
+      game: {},
+      accessPassword: ''
     }
   },
   methods: {
@@ -125,6 +136,7 @@ export default {
             totalUsersPlaying: game.userGames.length,
             private: !!game.accessPassword,
             access: true,
+            accessPassword: game.accessPassword,
           }
         });
   
@@ -135,7 +147,19 @@ export default {
       this.createDialog = value;
       await this.loadGames();
     },
+    showValidateDialog(value) {
+      this.createValidateDialog = value;
+    },
     async accessGame(game) {
+      this.game = game
+      if(this.game.private) {
+        this.accessPassword = this.game.accessPassword
+        this.showValidateDialog(true)
+      } else {
+        this.redirectToGame()
+      }
+    },
+    async redirectToGame() {
       const userGames = {
         totalPoints: 0,
         isHost: false,
@@ -143,12 +167,12 @@ export default {
           id: this.$store.getters["users/get"]("user").id,
         },
         game: {
-          id: game.id
+          id: this.game.id
         }  
       }
       await this.$store.dispatch("games/createUserGame", userGames);
 
-      this.$store.commit("games/set", { key: "game", value: game });
+      this.$store.commit("games/set", { key: "game", value: this.game });
       this.$router.push({ name: "Game" });
     },
     async validateGame() {
@@ -168,7 +192,7 @@ export default {
     },
   },
   async mounted() {
-    await this.validateGame()
+    // await this.validateGame()
     await this.loadGames();
   },
   created() {
