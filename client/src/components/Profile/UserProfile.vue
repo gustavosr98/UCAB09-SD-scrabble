@@ -170,7 +170,7 @@ export default {
         setTimeout(() => {
           this.actionExecutedSuccessfully = false;
           this.$router.push({ name: "Login" });
-        }, 10000);
+        }, 3000);
       }
     },
     closeMessageModal() {
