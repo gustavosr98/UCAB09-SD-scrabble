@@ -1,13 +1,11 @@
 <template>
-  <div v-if="loading" id="loader" class="d-flex justify-content-center loader">
-    <v-progress-circular class="loader-dots" size="70" indeterminate color="primary"></v-progress-circular>
-  </div>
-
-  <v-container v-else >      
+  <v-container>      
       <div>
         <v-row v-for="(row,i) in board" :key="i" class="row-justify">
           <div v-for="(cell, j) in board[i]" :key="i*15+j" @click="onBoardClick(i, j)">
-            <v-avatar size="45" tile class="cell border-letter" :class="{
+            <v-avatar size="45" tile class="cell" :class="{
+              'border-letter': gameStarted && userPlayer.turn,
+              'border-letter-locked': !gameStarted || !userPlayer.turn,
               'selected': cell.selected,
               'pending': cell == selectedBoardCell,
               'locked': cell.isLocked,
@@ -28,10 +26,10 @@
         <br/>
         <v-row class="row-justify">
           <v-avatar size="72" tile class="cell default hand mx-2"  
-            @click="onHandClick(0, i)"
-            v-for="(letter, i) in players[0].hand"
+            @click="onHandClick(i)"
+            v-for="(letter, i) in userPlayer.hand"
             :key="i"
-            :class="{'locked': (currentPlayer != players[0]), 'pending': (currentPlayer == players[0]) && i == selectedHandIndex}"
+            :class="{'locked': (!userPlayer.turn), 'pending': (userPlayer.turn) && i == selectedHandIndex}"
           >
             <span>
               {{letter}}
@@ -60,6 +58,14 @@ export default {
     user: {
       type: Object,
       required: true
+    },
+    userPlayer:{
+      type: Object,
+      required: true
+    },
+    players:{
+      type: Array,
+      required: true
     }
   },
   data: () => ({
@@ -74,22 +80,10 @@ export default {
     board: [],
     lettersDeck: [],
     waiting: false,
-    players: [
-      {
-        name: "Player 1",
-        hand: [],
-        score: 0
-      },
-      {
-        name: "Player 2",
-        hand: [],
-        score: 0
-      }
-    ],
     wordsDict: [],
     letters: LETTERS_DESTRIBUTION,
-    currentPlayer: null,
     selectedBoardCell: null,
+    gameStarted: false,
     selectedHandIndex: -1
   }),
   methods: {
@@ -267,13 +261,13 @@ export default {
             break;
         }
       }
-      this.currentPlayer.score += score;
+      this.userPlayer.score += score;
     },
     nextTurn() {
-      this.currentPlayer =
-        this.currentPlayer == this.players[0]
+      /*this.userPlayer =
+        this.userPlayer == this.player
           ? this.players[1]
-          : this.players[0];
+          : this.player;*/
     },
     cancel() {
       this.selectedBoardCell = null;
@@ -281,7 +275,7 @@ export default {
       // Reset Board
       this.applyToBoard(cell => {
         if (cell.selected && cell.content != EMPTY_CELL) {
-          this.currentPlayer.hand.push(cell.content);
+          this.userPlayer.hand.push(cell.content);
           cell.content = EMPTY_CELL;
           cell.selected = false;
         }
@@ -290,16 +284,16 @@ export default {
     },
     insertLetter() {
       if (this.selectedBoardCell.content != EMPTY_CELL)
-        this.currentPlayer.hand.push(this.selectedBoardCell.content);
-      this.selectedBoardCell.content = this.currentPlayer.hand[
+        this.userPlayer.hand.push(this.selectedBoardCell.content);
+      this.selectedBoardCell.content = this.userPlayer.hand[
         this.selectedHandIndex
       ];
-      this.currentPlayer.hand.splice(this.selectedHandIndex, 1);
+      this.userPlayer.hand.splice(this.selectedHandIndex, 1);
       this.selectedBoardCell = null;
       this.selectedHandIndex = -1;
     },
-    onHandClick(playerIndex, i) {
-      if (this.players[playerIndex] != this.currentPlayer) return;
+    onHandClick(i) {
+      if (!this.userPlayer.turn) return;
       this.selectedHandIndex = i;
 
       if (this.selectedBoardCell && this.selectedHandIndex > -1)
@@ -316,7 +310,7 @@ export default {
         this.board[i][j].selected &&
         this.board[i][j].content != EMPTY_CELL
       ) {
-        this.currentPlayer.hand.push(this.board[i][j].content);
+        this.userPlayer.hand.push(this.board[i][j].content);
         this.board[i][j].content = EMPTY_CELL;
       }
 
@@ -373,6 +367,7 @@ export default {
         );
     },
     generateLettersDeck() {
+      this.gameStarted= true;
       this.lettersDeck = [];
       console.log(LETTERS_DESTRIBUTION);
       for (let letter in LETTERS_DESTRIBUTION) {
@@ -383,19 +378,18 @@ export default {
         );
       }
       this.lettersDeck = _.shuffle(this.lettersDeck);
+      this.fillHands();
     },
     fillHands() {
       for (let player of this.players) {
         while (player.hand.length < 7) player.hand.push(this.lettersDeck.pop());
       }
+      this.userPlayer.hand= this.players.find(player=>player.id = this.userPlayer.id).hand;
     }
   },
   mounted() {
     this.loading = true;
-    this.currentPlayer = this.players[0];
     this.initGameBoard();
-    this.generateLettersDeck();
-    this.fillHands();
     this.cancel();
     console.log("user", this.user);
     this.loading = false;
@@ -430,6 +424,10 @@ $cell-size: 24px;
   &:hover {
       border: 2px solid red !important;
     }
+}
+
+.border-letter-locked{
+  border: solid 2px black !important;
 }
 
 .double-letter {

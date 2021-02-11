@@ -149,6 +149,7 @@ const actions = {
             timeLeftToCickOut: 300,
             wasKickedOut: false,
             tokens: [],
+            score:0
           },
         ],
         status: ROOM_STATUS.CREATED,
@@ -181,6 +182,7 @@ const actions = {
             timeLeftToCickOut: 300,
             wasKickedOut: false,
             tokens: [],
+            score:0
           },
         ])
       );

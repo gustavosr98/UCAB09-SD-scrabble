@@ -15,7 +15,7 @@
         >
           <p class="mb-1">{{ p.idGame }}</p>
           <p class="mb-1">{{ p.username }}</p>
-          <p class="mb-1">{{ p.points }}</p>
+          <p class="mb-1">{{ p.score }}</p>
         </v-row>
       </v-col>
     </v-row>

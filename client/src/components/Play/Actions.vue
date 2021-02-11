@@ -7,7 +7,7 @@
           <v-col cols="10">
             <v-btn
               block
-              @click="$store.game.dispatch.closeDoorAndStartGame()"
+              @click="startGame()"
               :disabled="isGameInProgress"
               >Empezar juego</v-btn
             >
@@ -68,6 +68,10 @@ export default {
   methods: {
     sendMove() {
       this.$emit("sendMove");
+    },
+    startGame(){
+      this.$store.dispatch("game/closeDoorAndStartGame");
+      this.$emit("startGame");
     },
     take() {},
     pass() {},

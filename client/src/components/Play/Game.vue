@@ -18,12 +18,14 @@
           <actions
             ref="actions"
             @sendMove="sendMove"
+            @startGame="startGame"
             :isHost="this.userGame.isHost"
           />
         </v-row>
       </v-col>
       <v-col cols="8">
-        <board ref="board" :user="user" />
+        <board v-if="playersList.length" ref="board" :user="user" :userPlayer="userPlayer" :players="playersList"/>
+          <v-progress-circular v-else size="70" indeterminate color="white" class="d-flex justify-content-center"></v-progress-circular>
       </v-col>
     </v-row>
     <!-- MODALS -->
@@ -67,6 +69,7 @@ export default {
       game: {},
       user: {},
       gameInfo: {},
+      userPlayer:null,
       playersList: [],
       movesList: [
         {
@@ -108,6 +111,9 @@ export default {
     sendMove() {
       this.$refs.board.validate();
     },
+    startGame(){
+      this.$refs.board.generateLettersDeck();
+    },
     async findGameInfo() {
       this.userGame = await this.$store.dispatch("users/getUserGame", {
         idUser: this.user.id,
@@ -118,19 +124,25 @@ export default {
         "games/getGameWithUsers",
         this.game.id
       );
-      this.setPlayers();
     },
     setPlayers() {
-      this.playersList = this.gameInfo.userGames.map((ug, i) => {
+      console.log("pzoo",this.$store.state.game.players)
+      let players = this.$store.state.game.players;
+      console.log("tzoo",this.$store.state.game.turn)
+      let playerWithTurn = this.$store.state.game.turn.playerId;
+      this.playersList = players.map((ug, i) => {
         return {
-          id: ug.user.id,
-          fullName: ug.user.fullName,
-          username: ug.user.username,
+          id: ug.info.id,
+          fullName: ug.info.fullName,
+          username: ug.info.username,
           idGame: `P${i + 1}`,
-          points: ug.totalPoints,
-          turn: false,
+          score: ug.score,
+          hand: ug.tokens,
+          turn: ug.info.id == playerWithTurn
         };
       });
+      this.userPlayer= this.playersList.find(player=>player.id = this.user.id);
+      console.log("p",this.playersList, this.userPlayer)
     },
     async enterRoom() {
       if (this.userGame.isHost) {
@@ -152,7 +164,9 @@ export default {
     this.game = this.$store.getters["games/get"]("game");
     await this.findGameInfo();
     await this.enterRoom();
+    this.setPlayers();
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+</style>
