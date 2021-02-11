@@ -92,7 +92,7 @@ const mutations = {
   },
   // TIMER
   resetTimer(state) {
-    clearInterval(state.timer.timer);
+    if (!state.timer.timer) clearInterval(state.timer.timer);
     state.timer.isRunning = false;
     state.timer.timer = null;
     state.timer.time = TURN_TIMER_INITIAL;
@@ -128,12 +128,19 @@ const actions = {
   },
   async getData({ dispatch, commit }) {
     const room = await zkClient.getData(`/room-${state.roomId}`, event => {
-      if (zkClient.Event.NODE_DATA_CHANGED === event.getType()) {
-        dispatch("checkGameover");
-        dispatch("getData");
-      }
+      dispatch("getData");
     });
+
     commit("setRoom", room);
+
+    // dispatch("checkGameover");
+
+    // if (
+    //   state.timer.time === TURN_TIMER_INITIAL &&
+    //   state.turn.playerId === state.playerId &&
+    //   state.status === ROOM_STATUS.IN_PROGRESS
+    // )
+    //   dispatch("startTurnTimer");
   },
   async createEphemeral({ commit, state }) {
     try {
@@ -284,6 +291,8 @@ const actions = {
       nextPlayer = state.players.find(
         p => !p?.wasKickedOut && p?.id !== playingPlayerId
       );
+      console.log("a");
+      console.log(nextPlayer);
     } else {
       nextPlayer = state.players.find(
         (p, index) =>
@@ -291,6 +300,7 @@ const actions = {
           p?.id !== playingPlayerId &&
           index > playingPlayerIndex
       );
+      console.log(nextPlayer);
     }
 
     if (nextPlayer) {
@@ -309,14 +319,21 @@ const actions = {
   },
   // TURN ACTIONS / PLAY
   async sendMove({ dispatch, state }, { words, points }) {
+    const myPlayer = state.players.find(p => p?.id === state.playerId);
+
     state.movesHistory = [
       ...state.movesHistory,
       {
-        alias: state.players.find(p => p?.id === state.playerId)?.idGame,
+        alias: myPlayer?.idGame,
         words: words.reduce((total, w) => `${total}, ${w}`, ""),
         points,
       },
     ];
+    // await dispatch("updateUserPlayer", {
+    //   ...myPlayer,
+    //   score: myPlayer.score + points,
+    // });
+    // await dispatch("fillHands");
     await dispatch("tellNextPlayerToPlay", state.playerId);
   },
   // TURN ACTIONS / PASS
@@ -351,11 +368,11 @@ const actions = {
     await gamesRepository.updateGameStatus(state.userGame.game.id, 3);
     await gamesRepository.updateUserGame(state.userGame.id, {
       totalPoints:
-        state.players.find(p => (p?.id = state.playerId))?.score || 0,
+        state.players.find(p => p?.id === state.playerId)?.score || 0,
       isHost: state.userGame.isHost,
       wasKickedOut: false,
     });
-    // await zkClient.removeRecursive(`/room-${state.roomId}`);
+    await zkClient.removeRecursive(`/room-${state.roomId}`);
   },
   // TIMER
   async startTurnTimer({ dispatch, commit, state }) {
@@ -368,9 +385,11 @@ const actions = {
         toKV("timer", {
           ...state.timer,
           timer: setInterval(async () => {
-            if (state.timer.time > 0) {
+            if (state.turn.playerId !== state.playerId) {
+              commit("resetTimer");
+            } else if (state.timer.time > 0) {
               state.timer.time--;
-            } else if (state.turn.playerId === state.playerId) {
+            } else {
               await dispatch("pass");
               commit("resetTimer");
             }
@@ -399,9 +418,14 @@ const actions = {
                     String.toString(playerId)
                   ] = KICK_OUT_TIMER_INITIAL;
                 } else {
-                  if (timeLeft > 0)
+                  if (timeLeft > 0) {
                     state.kickOutTimers[String.toString(playerId)] -= 10;
-                  else await dispatch("exitRoom", playerId);
+                  } else if (
+                    !state.players.map(p => p?.id === state.playerId)
+                      .wasKickedOut
+                  ) {
+                    await dispatch("exitRoom", playerId);
+                  }
                 }
               }
             });
@@ -429,7 +453,7 @@ const actions = {
     }
   },
   // USER
-  async updateUserPlayer({ dispatch, commit, state }, userPlayer) {
+  async updateUserPlayer({ commit, state }, userPlayer) {
     commit(
       "set",
       toKV(
@@ -440,8 +464,6 @@ const actions = {
         })
       )
     );
-
-    await dispatch("updateRoom");
   },
   // OTHERS
   reset({ commit }) {
@@ -452,7 +474,6 @@ const actions = {
     state.players.map(player => {
       while (player.hand.length < 7) player.hand.push(state.lettersDeck.pop());
     });
-    await dispatch("updateRoom");
   },
 };
 

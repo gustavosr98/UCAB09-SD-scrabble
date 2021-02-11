@@ -250,15 +250,10 @@ export default {
         });
 
         const roundScore = await this.computeScore(words, selectedCells);
-        await this.setUserPlayer({
-          ...this.userPlayer,
-          score: this.userPlayer.score + roundScore,
-        });
         await this.$store.dispatch("game/sendMove", {
           words,
           points: roundScore,
         });
-        await this.$store.dispatch("game/fillHands");
       } else {
         await this.cancel();
       }
@@ -421,7 +416,6 @@ export default {
         );
     },
     async generateLettersDeck() {
-      console.log("AAAAAAA");
       this.gameStarted = true;
       this.$store.state.game.lettersDeck = [];
 

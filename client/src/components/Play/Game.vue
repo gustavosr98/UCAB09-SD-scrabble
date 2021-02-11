@@ -68,7 +68,6 @@ export default {
     actions: Actions,
     board: Board,
   },
-  props: {},
   data() {
     return {
       logo: LogoFull,
