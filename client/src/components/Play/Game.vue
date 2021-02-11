@@ -99,17 +99,9 @@ export default {
       this.$refs.board.validate();
     },
     async findGameInfo() {
-      this.userGame = await this.$store.dispatch("users/getUserGame", {
-        idUser: this.user.id,
-        idGame: this.game.id,
-      });
-      console.log(this.userGame);
-      this.gameInfo = await this.$store.dispatch(
-        "games/getGameWithUsers",
-        this.game.id
-      );
-      console.log(this.gameInfo);
-      this.setPlayers();
+      this.userGame = await this.$store.dispatch("users/getUserGame", {idUser:this.user.id, idGame:this.game.id});
+      this.gameInfo = await this.$store.dispatch("games/getGameWithUsers", this.game.id);
+      this.setPlayers()
     },
     setPlayers() {
       this.playersList = this.gameInfo.userGames.map((ug, i) => {
@@ -141,8 +133,6 @@ export default {
     this.setBackgroundDark({ value: true });
     this.user = this.$store.getters["users/get"]("user");
     this.game = this.$store.getters["games/get"]("game");
-    console.log(this.user);
-    console.log(this.game);
     await this.findGameInfo();
     await this.enterRoom();
   },
