@@ -355,7 +355,6 @@ const actions = {
   },
   // ENDGAME
   async checkGameover({ dispatch }) {
-    const myPlayer = state.players.find(p => p?.id === state.playerId);
     // const twoRoundsPassing = state.movesHistory.map(move => move.words.length === 0); /* hacer */
     // const state.players.map(p=> !p.wasKickedOut);
 
