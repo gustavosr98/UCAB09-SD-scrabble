@@ -40,7 +40,6 @@
           no-data-text="No hay salas activas en la aplicación"
           class="elevation-1 px-0"
           :options.sync="options"
-          :server-items-length="count"
         >
           <template v-slot:[`item.private`]="{ item }">
             <v-btn v-if="item.private" icon color="light" x-small>
