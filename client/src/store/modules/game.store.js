@@ -14,6 +14,7 @@ const KICK_OUT_TIMER_INITIAL = 60;
 const initialState = () => {
   return {
     // LOCAL
+    imWinner: false,
     timer: {
       timer: null,
       time: TURN_TIMER_INITIAL,
@@ -362,10 +363,9 @@ const actions = {
   },
   // ENDGAME
   async checkGameover({ dispatch }) {
-    // allPlayersPassed
-
     const totalPlayers = state.players.filter(player => !player?.wasKickedOut);
-    let allPlayersPassed = true;
+    let allPlayersPassed =
+      state.movesHistory.length >= totalPlayers.length * 2 ? true : false;
     for (let player of totalPlayers) {
       let playerRoundsPassing = 0;
       let i = state.movesHistory.length - 1;
@@ -389,13 +389,11 @@ const actions = {
 
     const playerWinner = state.players.sort((a, b) => b.score - a.score)[0];
     const imWinner = playerWinner.id === state.playerId;
+    state.imWinner = imWinner;
 
-    console.log(allPlayersPassed);
-    console.log(playerWinner);
-    console.log(imWinner);
-    // if (allPlayersPassed && imWinner) {
-    //   await dispatch("reportScore");
-    // }
+    if (allPlayersPassed && imWinner) {
+      await dispatch("reportScore");
+    }
   },
   async reportScore({ dispatch, commit, state }) {
     console.log(state.userGame);

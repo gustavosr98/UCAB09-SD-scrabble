@@ -43,11 +43,22 @@
       @okAction="$refs.actions.goOut()"
       :withCancelBtn="false"
     />
+    <MessageModal
+      :showModal="$store.state.game.status === 'FINISHED'"
+      title="Fin!"
+      :message="
+        $store.state.game.imWinner
+          ? 'Has sido el ganador! Podras ver tus puntos en el ranking.'
+          : 'Has perdido. Intenta mejor la proxima vez'
+      "
+      @okAction="$router.push('/')"
+    />
   </v-container>
 </template>
 
 <script>
 import WarningModal from "@/components/General/Modals/WarningModal";
+import MessageModal from "@/components/General/Modals/MessageModal";
 import LogoFull from "@/assets/Brand/Logo_Full.png";
 import Timer from "@/components/Play/Timer";
 import Players from "@/components/Play/Players";
@@ -62,6 +73,7 @@ export default {
   name: "game",
   components: {
     WarningModal,
+    MessageModal,
     timer: Timer,
     players: Players,
     moves: Moves,
