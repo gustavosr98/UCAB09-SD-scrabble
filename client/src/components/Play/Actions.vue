@@ -5,10 +5,7 @@
         <v-row v-if="isHost" justify="center">
           <v-icon color="white">mdi-play</v-icon>
           <v-col cols="10">
-            <v-btn
-              block
-              @click="startGame()"
-              :disabled="isGameInProgress"
+            <v-btn block @click="startGame()" :disabled="isGameInProgress"
               >Empezar juego</v-btn
             >
           </v-col>
@@ -16,7 +13,7 @@
         <v-row justify="center">
           <v-icon color="white">mdi-send-outline</v-icon>
           <v-col cols="10">
-            <v-btn block @click="sendMove()" :disabled="!isGameInProgress"
+            <v-btn block @click="sendMove()" :disabled="!canPlay"
               >Enviar Jugada</v-btn
             >
           </v-col>
@@ -24,13 +21,15 @@
         <v-row justify="center">
           <v-icon color="white">mdi-rectangle</v-icon>
           <v-col cols="10">
-            <v-btn block @click="take()">Tomar Fichas</v-btn>
+            <v-btn block @click="take()" :disabled="!canPlay"
+              >Tomar Fichas</v-btn
+            >
           </v-col>
         </v-row>
         <v-row justify="center">
           <v-icon color="white">mdi-skip-next-outline</v-icon>
           <v-col cols="10">
-            <v-btn block @click="pass()">Pasar</v-btn>
+            <v-btn block @click="pass()" :disabled="!canPlay">Pasar</v-btn>
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -64,19 +63,30 @@ export default {
     isGameInProgress() {
       return this.$store.state.game.status === ROOM_STATUS.IN_PROGRESS;
     },
+    isMyTurn() {
+      return (
+        this.$store.state.game.turn.playerId === this.$store.state.game.playerId
+      );
+    },
+    canPlay() {
+      return this.isGameInProgress && this.isMyTurn;
+    },
   },
   methods: {
     sendMove() {
       this.$emit("sendMove");
     },
-    startGame(){
+    startGame() {
       this.$store.dispatch("game/closeDoorAndStartGame");
       this.$emit("startGame");
     },
     take() {},
     pass() {},
     async goOut() {
-      await this.$store.dispatch("game/exitRoom");
+      await this.$store.dispatch(
+        "game/exitRoom",
+        this.$store.state.game.playerId
+      );
       this.$router.push({ name: "Play" });
     },
   },

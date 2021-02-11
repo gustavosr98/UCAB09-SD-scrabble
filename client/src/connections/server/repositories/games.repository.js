@@ -17,6 +17,7 @@ export default class GamesRepository extends Repository {
     return this.get(id);
   }
 
+  // USER GAME
   async getGameWithUsers(id) {
     return await this.httpClient.get(`games/${id}/users`);
   }
@@ -31,5 +32,10 @@ export default class GamesRepository extends Repository {
 
   async deleteUserGame(id) {
     return this.httpClient.delete(`user-game/${id}`);
+  }
+
+  // STATUS
+  async updateGameStatus(id, statusId) {
+    return this.httpClient.patch(`games/${id}/status/${statusId}`);
   }
 }

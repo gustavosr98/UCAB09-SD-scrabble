@@ -1,5 +1,4 @@
 import zkClient from "@/connections/zookeeper/zk-client";
-import Logger from "@/utils/logger";
 import GamesRepository from "@/connections/server/repositories/games.repository.js";
 import UsersRepository from "@/connections/server/repositories/users.repository.js";
 
@@ -8,7 +7,8 @@ import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 const gamesRepository = new GamesRepository();
 const usersRepository = new UsersRepository();
 
-const TURN_TIMER_INITIAL = 300;
+const TURN_TIMER_INITIAL = 60;
+const KICK_OUT_TIMER_INITIAL = 60;
 
 // Initial State object
 const initialState = () => {
@@ -19,6 +19,8 @@ const initialState = () => {
       time: TURN_TIMER_INITIAL,
       isRunning: false,
     },
+    kickOutInterval: null,
+    kickOutTimers: {},
     // base
     roomId: null,
     playerId: null,
@@ -99,9 +101,10 @@ const actions = {
     dispatch("updateRoom");
   },
   // CONNECTION
-  async connect({ commit }) {
+  async connect({ dispatch, commit }) {
     try {
       await zkClient.connect();
+      await dispatch("startPlayersConnectivityPooling");
     } catch {
       commit(
         "error",
@@ -110,7 +113,6 @@ const actions = {
     }
   },
   async loadNode({ dispatch, commit, state }) {
-    await dispatch("connect");
     if (!(await zkClient.exists(`/room-${state.roomId}`))) {
       commit("error", "La sala no existe o ya ha sido cerrada");
     } else {
@@ -121,7 +123,7 @@ const actions = {
   async getData({ dispatch, commit }) {
     const room = await zkClient.getData(`/room-${state.roomId}`, event => {
       if (zkClient.Event.NODE_DATA_CHANGED === event.getType()) {
-        console.log("CAMBIE");
+        dispatch("checkGameover");
         dispatch("getData");
       }
     });
@@ -168,6 +170,7 @@ const actions = {
   async enterRoom({ dispatch, commit, state }, { roomId, user }) {
     commit("set", toKV("roomId", roomId));
     commit("set", toKV("playerId", user.id));
+    if (!state.userGame.isHost) await dispatch("connect");
     await dispatch("loadNode");
 
     const player = getPlayer(state, user.id);
@@ -195,7 +198,10 @@ const actions = {
     }
   },
   async closeDoorAndStartGame({ dispatch, commit, state }) {
-    dispatch("startTurnTimer");
+    await gamesRepository.updateGameStatus(state.userGame.game.id, 2);
+    commit("set", toKV("status", ROOM_STATUS.IN_PROGRESS));
+    dispatch("updateRoom");
+    await dispatch("startTurnTimer");
   },
   async updateRoom({ state }) {
     await zkClient.setData(`/room-${state.roomId}`, {
@@ -208,13 +214,18 @@ const actions = {
       turn: state.turn,
     });
   },
-  async exitRoom({ dispatch, state }) {
-    if (ROOM_STATUS.IN_PROGRESS) {
-      await dispatch("kickOutOfRoomForcely", state.playerId);
+  async exitRoom({ dispatch, state }, playerId) {
+    if (state.status === ROOM_STATUS.IN_PROGRESS) {
+      await dispatch("kickOutOfRoomForcely", playerId);
     } else {
-      await dispatch("kickOutOfRoomGently", state.playerId);
+      await dispatch("kickOutOfRoomGently", playerId);
     }
+
     await zkClient.close();
+
+    if (playerId === state.playerId) {
+      clearInterval(state.kickOutInterval);
+    }
   },
   async kickOutOfRoomForcely({ dispatch, commit, state }, playerId) {
     commit(
@@ -224,10 +235,12 @@ const actions = {
         state.players.map(p => {
           if (p?.info.id === playerId) {
             p.info.wasKickedOut = true;
-          } else return p;
+          } else if (p?.info.id) return p;
         })
       )
     );
+
+    await dispatch("updateRoom");
 
     const playerUserGame = await usersRepository.getUserGame(
       playerId,
@@ -238,8 +251,6 @@ const actions = {
       isHost: playerUserGame.isHost,
       wasKickedOut: true,
     });
-
-    dispatch("updateRoom");
   },
   async kickOutOfRoomGently({ dispatch, commit, state }, playerId) {
     commit(
@@ -251,6 +262,7 @@ const actions = {
         })
       )
     );
+    await dispatch("updateRoom");
 
     const playerUserGame = await usersRepository.getUserGame(
       playerId,
@@ -260,26 +272,23 @@ const actions = {
     if (playerUserGame.isHost) {
       await gamesRepository.delete(state.roomId);
     }
-    dispatch("updateRoom");
-  },
-  async closeRoom({ state }) {
-    await zkClient.removeRecursive(`/room-${state.roomId}`);
   },
   // TURN ACTIONS
   async tellNextPlayerToPlay({ dispatch, commit, state }, playingPlayerId) {
     const playingPlayerIndex = state.players.findIndex(
-      p => p?.user.id === playingPlayerId
+      p => p?.info.id === playingPlayerId
     );
+
     let nextPlayerId = null;
     if (playingPlayerIndex + 1 === state.players.length) {
       nextPlayerId = state.players.find(
-        p => !p?.wasKickedOut && p?.user.id !== playingPlayerId
+        p => !p?.wasKickedOut && p?.info.id !== playingPlayerId
       );
     } else {
       nextPlayerId = state.players.find(
         (p, index) =>
           !p?.wasKickedOut &&
-          p?.user.id !== playingPlayerId &&
+          p?.info.id !== playingPlayerId &&
           index > playingPlayerIndex
       );
     }
@@ -292,30 +301,99 @@ const actions = {
           playerId: nextPlayerId,
         })
       );
-      dispatch("updateRoom");
+      await dispatch("updateRoom");
+      await dispatch("startTurnTimer");
     } else {
-      dispatch("reportScore", state.player);
+      await dispatch("reportScore", state.player);
     }
   },
   // TURN ACTIONS / PLAY
-  async sendMove(tokens /*Token[]*/) {},
+  async sendMove({ dispatch }, tokens /*Token[]*/) {
+    await dispatch("tellNextPlayerToPlay", state.playerId);
+  },
   // TURN ACTIONS / PASS
   async pass({ dispatch, state }) {
-    // make move
-    dispatch("tellNextPlayerToPlay", state.playerId);
+    // make empty move
+    await dispatch("tellNextPlayerToPlay", state.playerId);
   },
   // TURN ACTIONS / CHANGE_TOKENS
-  async changeTokens(tokens /*Token[]*/) {},
+  async changeTokens({ dispatch }, tokens /*Token[]*/) {
+    await dispatch("tellNextPlayerToPlay", state.playerId);
+  },
   // ENDGAME
-  async reportScore({ dispatch }) {
-    // gameRepository.update(....)
-    await dispatch("closeRoom");
+  async checkGameover({ dispatch }) {
+    const twoRoundsPassing = false; /* hacer */
+    const imWinner = false; /* hacer */
+    if (twoRoundsPassing && imWinner) {
+      await dispatch("reportScore");
+    }
+  },
+  async reportScore({ dispatch, commit, state }) {
+    console.log(state.userGame);
+    commit("set", toKV("status", ROOM_STATUS.FINISHED));
+    dispatch("updateRoom");
+    await gamesRepository.updateGameStatus(state.userGame.game.id, 3);
+    await gamesRepository.updateUserGame(state.userGame.id, {
+      totalPoints: 100 /* cambiar */,
+      isHost: state.userGame.isHost,
+      wasKickedOut: false,
+    });
+    // await zkClient.removeRecursive(`/room-${state.roomId}`);
   },
   // TIMER
   async startTurnTimer({ dispatch, commit, state }) {
     commit("resetTimer");
     commit("set", toKV("timer", { ...state.timer, isRunning: true }));
 
+    if (!state.timer.timer) {
+      commit(
+        "set",
+        toKV("timer", {
+          ...state.timer,
+          timer: setInterval(async () => {
+            if (state.timer.time > 0) {
+              state.timer.time--;
+            } else if (state.turn.playerId === state.playerId) {
+              await dispatch("pass");
+              commit("resetTimer");
+            }
+          }, 1000),
+        })
+      );
+    }
+  },
+  async startPlayersConnectivityPooling({ dispatch, commit, state }) {
+    if (!state.kickOutInterval) {
+      commit(
+        "set",
+        toKV(
+          "kickOutInterval",
+          setInterval(async () => {
+            state.players.map(async p => {
+              let playerId = p?.info.id;
+              if (playerId && playerId !== state.playerId) {
+                const isActive = await zkClient.exists(
+                  `/room-${state.roomId}/${playerId}`
+                );
+
+                const timeLeft = state.kickOutTimers[String.toString(playerId)];
+                if (isActive) {
+                  state.kickOutTimers[
+                    String.toString(playerId)
+                  ] = KICK_OUT_TIMER_INITIAL;
+                } else {
+                  if (timeLeft > 0)
+                    state.kickOutTimers[String.toString(playerId)] -= 10;
+                  else await dispatch("exitRoom", playerId);
+                }
+              }
+            });
+          }, 10000)
+        )
+      );
+    }
+  },
+  async resetKickOutTimer({ dispatch, commit, state }) {
     if (!state.timer.timer) {
       commit(
         "set",
