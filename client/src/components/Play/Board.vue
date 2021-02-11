@@ -56,6 +56,12 @@ let WORDS = checkWord('es');
 
 export default {
   name: "board",
+  props: {
+    user: {
+      type: Object,
+      required: true
+    }
+  },
   data: () => ({
     EFFECTS: {
       DOUBLE_LETTER: L2,
@@ -384,25 +390,15 @@ export default {
       }
     }
   },
-  beforeMount() {
+  mounted() {
     this.loading = true;
     this.currentPlayer = this.players[0];
     this.initGameBoard();
     this.generateLettersDeck();
     this.fillHands();
     this.cancel();
-    let ans = WORDS.check('thfrow');
-     console.log("answer student", ans);
-    // this.board[7][7].content = this.lettersDeck.pop();
-    // this.board[7][7].isLocked = true;
+    console.log("user", this.user);
     this.loading = false;
-   /* fetch(`words_dictionary.json`)
-      .then(res => res.json())
-      .then(res => {
-        console.log(res);
-        this.wordsDict = res;
-        this.loading = false;
-      });*/
   }
 };
 </script>

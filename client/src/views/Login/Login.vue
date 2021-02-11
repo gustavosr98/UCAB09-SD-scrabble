@@ -1,7 +1,7 @@
 <template>
   <v-container fluid fill-height>
     <v-row class="justify-center">
-      <v-col cols="12" xs="12" sm="12" md="4">
+      <v-col cols="12" xs="12" sm="6" md="4">
         <v-img src="@/assets/Brand/Logo_Full.png"></v-img>
       </v-col>
     </v-row>

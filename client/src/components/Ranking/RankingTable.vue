@@ -15,8 +15,8 @@
       <v-col cols="12" sm="6" class="d-flex align-end justify-end">
         <v-text-field
           v-model="search"
-          prepend-icon="mdi-magnify"
-          append-icon="mdi-close"
+          prepend-inner-icon="mdi-magnify"
+          append-inner-icon="mdi-close"
           @click:append="search = ''"
           label="Buscar"
           single-line
@@ -28,7 +28,7 @@
           x-small
           fab
         >
-          <v-icon dark color="primary">mdi-reload</v-icon>
+          <v-icon dark color="primary">mdi-refresh</v-icon>
         </v-btn>
       </v-col>
     </v-row>

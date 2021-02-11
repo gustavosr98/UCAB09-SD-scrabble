@@ -71,7 +71,7 @@ export class AuthService {
         user: Partial<User>,
     ): Promise<{ access_token: string; user: Partial<User> }> {
         this.log.debug(
-            `login: generating token for=${user.id}|username=${user.username}]`,
+            `login: generating token for [userId=${user.id}|username=${user.username}]`,
             this.logMetadata,
         );
         const payload = { id: user.id, username: user.username };

@@ -23,7 +23,7 @@
         </v-row>
       </v-col>
       <v-col cols="8">
-        <board ref="board" />
+        <board ref="board" :user="user" />
       </v-col>
     </v-row>
     <!-- MODALS -->
@@ -114,13 +114,11 @@ export default {
         idUser: this.user.id,
         idGame: this.game.id,
       });
-      console.log(this.userGame);
       this.$store.commit("game/set", { key: "userGame", value: this.userGame });
       this.gameInfo = await this.$store.dispatch(
         "games/getGameWithUsers",
         this.game.id
       );
-      console.log(this.gameInfo);
       this.setPlayers();
     },
     setPlayers() {
@@ -153,8 +151,6 @@ export default {
     this.setBackgroundDark({ value: true });
     this.user = this.$store.getters["users/get"]("user");
     this.game = this.$store.getters["games/get"]("game");
-    console.log(this.user);
-    console.log(this.game);
     await this.findGameInfo();
     await this.enterRoom();
   },
