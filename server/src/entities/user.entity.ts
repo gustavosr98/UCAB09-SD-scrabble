@@ -1,9 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 import { UserGame } from '@/entities';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { Status } from './status.entity';
 
 @Entity()
 export class User {
@@ -26,6 +27,11 @@ export class User {
     @Exclude()
     @Column({ select: false, nullable: true })
     salt?: string;
+
+    @Column({ name: 'fk_status', type: 'int', default: 4 })
+    @ManyToOne((type) => Status, (status) => status.users)
+    @JoinColumn({ name: 'fk_status' })
+    status: Status;
 
     @OneToMany((type) => UserGame, (userGame) => userGame.user)
     userGames?: UserGame[];

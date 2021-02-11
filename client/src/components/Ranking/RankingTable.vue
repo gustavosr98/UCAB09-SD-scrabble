@@ -15,7 +15,7 @@
       <v-col cols="12" sm="6" class="d-flex align-end justify-end">
         <v-text-field
           v-model="search"
-          prepend-icon="mdi-magnify"
+          prepend-inner-icon="mdi-magnify"
           label="Buscar"
           single-line
           hide-details
@@ -26,9 +26,8 @@
           class="mx-2"
           x-small
           fab
-          dark
         >
-          <v-icon dark>mdi-reload</v-icon>
+          <v-icon dark color="primary">mdi-refresh</v-icon>
         </v-btn>
       </v-col>
     </v-row>
