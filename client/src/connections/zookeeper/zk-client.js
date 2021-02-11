@@ -19,9 +19,7 @@ export class ZKClient {
 
   // INIT
   async connect(onConnect = () => {}, onDisconnect = () => {}) {
-    this.#client = zookeeper.createClient(this.#zkUrl, {
-      sessionTimeout: this.#timeout,
-    });
+    this.#client = zookeeper.createClient(this.#zkUrl);
     this.#client.connect();
 
     return new Promise((resolve, reject) => {

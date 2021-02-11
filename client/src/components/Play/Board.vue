@@ -77,6 +77,7 @@ import {
   SS,
   N0,
 } from "@/config/constants.js";
+import { mapState } from "vuex";
 
 const toKV = (key, value) => ({ key, value });
 
@@ -103,7 +104,15 @@ export default {
     gameStarted: false,
     selectedHandIndex: -1,
   }),
+  // watch: {
+  //   sharedBoard(newValue, oldValue) {
+  //     this.board = newValue;
+  //   },
+  // },
   computed: {
+    // ...mapState("game", {
+    //   sharedBoard: state => state.board,
+    // }),
     userPlayer() {
       return this.$store.state.game.players.find(
         p => p?.id === this.$store.state.game.playerId
@@ -250,15 +259,16 @@ export default {
         });
 
         const roundScore = await this.computeScore(words, selectedCells);
-        await this.$store.dispatch("game/sendMove", {
+        this.$store.dispatch("game/sendMove", {
           words,
           points: roundScore,
+          board: this.board,
         });
       } else {
-        await this.cancel();
+        this.cancel();
       }
     },
-    async computeScore(words, selectedCells) {
+    computeScore(words, selectedCells) {
       let score = 0;
       for (let word of words)
         for (let letter of word) score += LETTERS_DESTRIBUTION[letter].score;
@@ -298,16 +308,16 @@ export default {
 
       return score;
     },
-    async setUserPlayer(userPlayer) {
-      await this.$store.dispatch("game/updateUserPlayer", userPlayer);
+    setUserPlayer(userPlayer) {
+      this.$store.dispatch("game/updateUserPlayer", userPlayer);
     },
-    async cancel() {
+    cancel() {
       this.selectedBoardCell = null;
       this.waiting = false;
       // Reset Board
       this.applyToBoard(async cell => {
         if (cell.selected && cell.content != EMPTY_CELL) {
-          await this.setUserPlayer({
+          this.setUserPlayer({
             ...this.userPlayer,
             hand: [...this.userPlayer.hand, cell.content],
           });
@@ -320,7 +330,7 @@ export default {
     },
     async insertLetter() {
       if (this.selectedBoardCell.content != EMPTY_CELL)
-        await this.setUserPlayer({
+        this.setUserPlayer({
           ...this.userPlayer,
           hand: [...this.userPlayer.hand, this.selectedBoardCell.content],
         });
@@ -329,7 +339,7 @@ export default {
         this.selectedHandIndex
       ];
 
-      await this.setUserPlayer({
+      this.setUserPlayer({
         ...this.userPlayer,
         hand: this.userPlayer.hand.filter(
           (h, i) => i !== this.selectedHandIndex
@@ -344,7 +354,7 @@ export default {
       this.selectedHandIndex = i;
 
       if (this.selectedBoardCell && this.selectedHandIndex > -1)
-        await this.insertLetter();
+        this.insertLetter();
     },
     async onBoardClick(i, j) {
       // Prevent click on locked cells
@@ -356,7 +366,7 @@ export default {
         this.board[i][j].selected &&
         this.board[i][j].content != EMPTY_CELL
       ) {
-        await this.setUserPlayer({
+        this.setUserPlayer({
           ...this.userPlayer,
           hand: [...this.userPlayer.hand, this.board[i][j].content],
         });

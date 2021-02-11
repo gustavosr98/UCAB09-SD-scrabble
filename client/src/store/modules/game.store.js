@@ -92,7 +92,7 @@ const mutations = {
   },
   // TIMER
   resetTimer(state) {
-    if (!state.timer.timer) clearInterval(state.timer.timer);
+    if (state.timer.timer) clearInterval(state.timer.timer);
     state.timer.isRunning = false;
     state.timer.timer = null;
     state.timer.time = TURN_TIMER_INITIAL;
@@ -133,14 +133,14 @@ const actions = {
 
     commit("setRoom", room);
 
-    // dispatch("checkGameover");
+    dispatch("checkGameover");
 
-    // if (
-    //   state.timer.time === TURN_TIMER_INITIAL &&
-    //   state.turn.playerId === state.playerId &&
-    //   state.status === ROOM_STATUS.IN_PROGRESS
-    // )
-    //   dispatch("startTurnTimer");
+    if (
+      state.timer.time === TURN_TIMER_INITIAL &&
+      state.turn.playerId === state.playerId &&
+      state.status === ROOM_STATUS.IN_PROGRESS
+    )
+      dispatch("startTurnTimer");
   },
   async createEphemeral({ commit, state }) {
     try {
@@ -318,9 +318,9 @@ const actions = {
     }
   },
   // TURN ACTIONS / PLAY
-  async sendMove({ dispatch, state }, { words, points }) {
+  async sendMove({ dispatch, commit, state }, { words, points, board }) {
     const myPlayer = state.players.find(p => p?.id === state.playerId);
-
+    commit("set", toKV(board, board));
     state.movesHistory = [
       ...state.movesHistory,
       {
@@ -329,11 +329,11 @@ const actions = {
         points,
       },
     ];
-    // await dispatch("updateUserPlayer", {
-    //   ...myPlayer,
-    //   score: myPlayer.score + points,
-    // });
-    // await dispatch("fillHands");
+    dispatch("updateUserPlayer", {
+      ...myPlayer,
+      score: myPlayer.score + points,
+    });
+    dispatch("fillHands");
     await dispatch("tellNextPlayerToPlay", state.playerId);
   },
   // TURN ACTIONS / PASS
@@ -453,7 +453,7 @@ const actions = {
     }
   },
   // USER
-  async updateUserPlayer({ commit, state }, userPlayer) {
+  updateUserPlayer({ commit, state }, userPlayer) {
     commit(
       "set",
       toKV(
@@ -470,7 +470,7 @@ const actions = {
     commit("reset");
   },
   // JUEGO
-  async fillHands({ dispatch, state }) {
+  fillHands({ dispatch, state }) {
     state.players.map(player => {
       while (player.hand.length < 7) player.hand.push(state.lettersDeck.pop());
     });
