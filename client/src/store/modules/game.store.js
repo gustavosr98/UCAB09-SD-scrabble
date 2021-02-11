@@ -163,9 +163,6 @@ const actions = {
     commit("set", toKV("playerId", user.id));
     await dispatch("loadNode");
 
-    // TEST
-    dispatch("startTurnTimer");
-
     const player = getPlayer(state, user.id);
     if (!player) {
       commit(
@@ -189,7 +186,9 @@ const actions = {
       );
     }
   },
-  async closeDoorAndStartGame({ dispatch, commit, state }) {},
+  async closeDoorAndStartGame({ dispatch, commit, state }) {
+    dispatch("startTurnTimer");
+  },
   async updateRoom({ state }) {
     await zkClient.setData(`/room-${state.roomId}`, {
       players: state.players,
@@ -235,14 +234,24 @@ const actions = {
     dispatch("updateRoom");
   },
   async kickOutOfRoomGently({ dispatch, commit, state }, playerId) {
-    commit("set");
+    commit(
+      "set",
+      toKV(
+        "players",
+        state.players.map(p => {
+          if (p?.info.id !== playerId) return p;
+        })
+      )
+    );
 
     const playerUserGame = await usersRepository.getUserGame(
       playerId,
       state.roomId
     );
     await gamesRepository.deleteUserGame(playerUserGame.id);
-
+    if (playerUserGame.isHost) {
+      await gamesRepository.delete(state.roomId);
+    }
     dispatch("updateRoom");
   },
   async closeRoom({ state }) {

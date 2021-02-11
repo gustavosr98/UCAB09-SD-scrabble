@@ -8,9 +8,9 @@ export class ZKClient {
   #timeout;
 
   constructor() {
-    this.basePath = "/g5_team";
     this.Event = zookeeper.Event;
 
+    this.basePath = process.env.VUE_APP_ZK_BASE_NODE;
     this.#zkUrl = process.env.VUE_APP_ZK_URL;
     this.#timeout = process.env.VUE_APP_ZK_TIMEOUT;
 

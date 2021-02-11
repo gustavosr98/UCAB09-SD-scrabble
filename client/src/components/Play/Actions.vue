@@ -5,7 +5,10 @@
         <v-row v-if="isHost" justify="center">
           <v-icon color="white">mdi-play</v-icon>
           <v-col cols="10">
-            <v-btn block @click="startGame()" :disabled="isGameInProgress"
+            <v-btn
+              block
+              @click="$store.game.dispatch.closeDoorAndStartGame()"
+              :disabled="isGameInProgress"
               >Empezar juego</v-btn
             >
           </v-col>
@@ -13,7 +16,9 @@
         <v-row justify="center">
           <v-icon color="white">mdi-send-outline</v-icon>
           <v-col cols="10">
-            <v-btn block @click="sendMove()">Enviar Jugada</v-btn>
+            <v-btn block @click="sendMove()" :disabled="!isGameInProgress"
+              >Enviar Jugada</v-btn
+            >
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -62,7 +67,6 @@ export default {
     },
   },
   methods: {
-    startGame() {},
     sendMove() {
       this.$emit("sendMove");
     },
