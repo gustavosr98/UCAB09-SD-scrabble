@@ -31,6 +31,7 @@ const initialState = () => {
       major: null,
     },
     // SHARED
+    validatedCells: [],
     players: [],
     status: null,
     lettersDeck: [],
@@ -107,7 +108,7 @@ const actions = {
     dispatch("updateRoom");
   },
   // CONNECTION
-  async connect({ dispatch, commit }) {
+  async connect({ dispatch, commit, state }) {
     try {
       await zkClient.connect();
       await dispatch("startPlayersConnectivityPooling");
@@ -176,6 +177,7 @@ const actions = {
         turn: {
           playerId: user.id,
         },
+        validatedCells: [],
       });
     }
 
@@ -227,6 +229,7 @@ const actions = {
       board: state.board,
       actualRound: state.actualRound,
       turn: state.turn,
+      validatedCells: state.validatedCells,
     });
   },
   async exitRoom({ dispatch, state }, playerId) {
@@ -318,14 +321,18 @@ const actions = {
     }
   },
   // TURN ACTIONS / PLAY
-  async sendMove({ dispatch, commit, state }, { words, points, board }) {
+  async sendMove(
+    { dispatch, commit, state },
+    { words, points, validatedCells }
+  ) {
     const myPlayer = state.players.find(p => p?.id === state.playerId);
-    commit("set", toKV(board, board));
+
+    commit("set", toKV("validatedCells", validatedCells));
     state.movesHistory = [
       ...state.movesHistory,
       {
         alias: myPlayer?.idGame,
-        words: words.reduce((total, w) => `${total}, ${w}`, ""),
+        words: words.reduce((total, w) => `${w}, ${total}`, ""),
         points,
       },
     ];

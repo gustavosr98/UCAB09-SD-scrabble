@@ -94,6 +94,7 @@ export default {
       TRIPLE_WORD: W3,
       START: SS,
     },
+    validatedCells: [],
     loading: true,
     board: [],
     lettersDeck: [],
@@ -104,15 +105,7 @@ export default {
     gameStarted: false,
     selectedHandIndex: -1,
   }),
-  // watch: {
-  //   sharedBoard(newValue, oldValue) {
-  //     this.board = newValue;
-  //   },
-  // },
   computed: {
-    // ...mapState("game", {
-    //   sharedBoard: state => state.board,
-    // }),
     userPlayer() {
       return this.$store.state.game.players.find(
         p => p?.id === this.$store.state.game.playerId
@@ -132,10 +125,11 @@ export default {
       this.board.forEach(v => v.forEach(f));
     },
     addLetters(letters) {
-      for (let letter of letters) {
-        this.board[letter.i][letter.j].content = letter.content;
-        this.board[letter.i][letter.j].isLocked = true;
-      }
+      if (letters && letters.length > 0)
+        for (let letter of letters) {
+          this.board[letter.i][letter.j].content = letter.content;
+          this.board[letter.i][letter.j].isLocked = true;
+        }
     },
     hasAdjacentCell(cell) {
       // Up
@@ -249,8 +243,11 @@ export default {
         : [];
 
       let isWordValid = words.every(word => WORDS.check(word.toLowerCase()));
+      this.validatedCells = [];
 
       if (isAligned && isWordValid) {
+        this.validatedCells = [...this.validatedCells, ...selectedCells];
+
         this.applyToBoard(cell => {
           if (cell.selected && cell.content != EMPTY_CELL) {
             cell.isLocked = true;
@@ -262,7 +259,7 @@ export default {
         this.$store.dispatch("game/sendMove", {
           words,
           points: roundScore,
-          board: this.board,
+          validatedCells: this.validatedCells,
         });
       } else {
         this.cancel();
@@ -448,6 +445,15 @@ export default {
     this.initGameBoard();
     this.cancel();
     this.loading = false;
+
+    // SUBCRIBE TO CHANGES IN BOARD
+    this.$store.subscribeAction({
+      after: (action, state) => {
+        if (action.type === "game/getData") {
+          this.addLetters(state.game.validatedCells);
+        }
+      },
+    });
   },
 };
 </script>

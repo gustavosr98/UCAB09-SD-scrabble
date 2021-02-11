@@ -23,14 +23,14 @@
             >
           </v-col>
         </v-row>
-        <v-row justify="center">
+        <!-- <v-row justify="center">
           <v-icon color="white">mdi-rectangle</v-icon>
           <v-col cols="10">
             <v-btn block @click="take()" :disabled="!canPlay"
               >Tomar Fichas</v-btn
             >
           </v-col>
-        </v-row>
+        </v-row> -->
         <v-row justify="center">
           <v-icon color="white">mdi-skip-next-outline</v-icon>
           <v-col cols="10">
@@ -97,8 +97,5 @@ export default {
       this.$router.push({ name: "Play" });
     },
   },
-  mounted() {},
 };
 </script>
-
-<style scoped></style>
