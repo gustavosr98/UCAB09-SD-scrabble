@@ -65,11 +65,11 @@ export default {
     return {
       chartSeries: [],
       numberOfLostGames: 0,
-      ranking: "",
-      bestGame: "",
-      points: "",
-      gamesWon: "",
-      gamesLost: "",
+      ranking: "0",
+      bestGame: "0 puntos",
+      points: "0",
+      gamesWon: "0 (0%)",
+      gamesLost: "0 (0%)",
     };
   },
   async mounted() {
@@ -80,13 +80,13 @@ export default {
       this.bestGame = `${this.$store.getters["users/get"]("gameStatistics").bestGame[0].totalpoints} puntos`;
       this.points = this.$store.getters["users/get"]("gameStatistics").totalAccumulatedPoints[0].totalaccumulatedpoints;
       
-      const gamesWonPercentage = this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon * 100 /
-        (parseInt(this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon) + parseInt(this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost));
+      const gamesWonPercentage = parseFloat(this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon * 100 /
+        (parseInt(this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon) + parseInt(this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost))).toFixed(1);
 
       this.gamesWon = `${this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon} (${gamesWonPercentage}%)`;
       
-      const gamesLostPercentage = this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost * 100 /
-        (parseInt(this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon) + parseInt(this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost));
+      const gamesLostPercentage = parseFloat(this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost * 100 /
+        (parseInt(this.$store.getters["users/get"]("gameStatistics").gamesWon[0].gameswon) + parseInt(this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost))).toFixed(1);
       
       this.gamesLost = `${this.$store.getters["users/get"]("gameStatistics").gamesLost[0].gameslost} (${gamesLostPercentage}%)`;
 
