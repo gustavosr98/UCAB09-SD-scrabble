@@ -10,6 +10,7 @@ const initialState = () => {
     ranking: [],
     countRanking: 0,
     error: "",
+    gameStatistics: {},
   };
 };
 
@@ -72,11 +73,37 @@ const actions = {
       commit("set", { key: "error", value: e.response });
     }
   },
+  async getUserGameStatistics({ commit }, userId) {
+    try {
+      const response = await usersRepository.getUserGameStatistics(userId);
+      commit("set", { key: "error", value: "" });
+      commit("set", { key: "gameStatistics", value: response });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
   async getUserGame({ commit }, {idUser, idGame}) {
     try {
       const response = await usersRepository.getUserGame(idUser, idGame);
       commit("set", { key: "error", value: "" });
       return response
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async updateProfile({ commit }, user) {
+    try {
+      const response = await usersRepository.updateUserProfile(user);
+      commit("set", { key: "error", value: "" });
+      commit("set", { key: "user", value: response });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async deleteAccount({ commit }, userId) {
+    try {
+      await usersRepository.deleteAccount(userId);
+      commit("set", { key: "error", value: "" });
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }

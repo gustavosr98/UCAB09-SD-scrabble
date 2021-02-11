@@ -17,6 +17,18 @@ export default class UsersRepository extends Repository {
     return await this.httpClient.get(`users/users/ranking?limit=${limit}&page=${page}&username=${username}`);
   }
 
+  async updateUserProfile(user) {
+    return await this.httpClient.patch(`users/${user.id}`, user);
+  }
+
+  async deleteAccount(userId) {
+    return await this.delete(userId);
+  }
+
+  async getUserGameStatistics(userId) {
+    return await this.get(`game-statistics/${userId}`);
+  }
+  
   async getUserGame(idUser, idGame) {
     return await this.httpClient.get(`user-game/users/${idUser}/games/${idGame}`);
   }

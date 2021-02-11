@@ -3,6 +3,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Game } from '@/entities';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from './user.entity';
 
 @Entity()
 export class Status {
@@ -19,4 +20,7 @@ export class Status {
 
     @OneToMany((type) => Game, (game) => game.status)
     games?: Game[];
+
+    @OneToMany((type) => User, (user) => user.status)
+    users?: User[];
 }

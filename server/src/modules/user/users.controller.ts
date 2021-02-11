@@ -33,6 +33,13 @@ export class UsersController implements CrudController<User> {
     }
 
     @UseGuards(AuthGuard('jwt'))
+    @UseInterceptors(CrudRequestInterceptor)
+    @Get('game-statistics/:id')
+    async getUserStatistics(@Param('id') id: number) {
+        return await this.service.getUserStatistics(id);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
     @Override()
     getMany(@ParsedRequest() req: CrudRequest) {
         return this.base.getManyBase(req);
@@ -58,8 +65,8 @@ export class UsersController implements CrudController<User> {
 
     @UseGuards(AuthGuard('jwt'))
     @Override('updateOneBase')
-    coolFunction(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: User) {
-        return this.base.updateOneBase(req, dto);
+    updateUser(@ParsedBody() user: User) {
+        return this.service.updateUser(user);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -70,8 +77,8 @@ export class UsersController implements CrudController<User> {
 
     @UseGuards(AuthGuard('jwt'))
     @Override()
-    async deleteOne(@ParsedRequest() req: CrudRequest) {
-        return this.base.deleteOneBase(req);
+    async deleteOne(@Param('id') id: number) {
+        return this.service.deleteUser(id);
     }
 
     @UseGuards(AuthGuard('jwt'))
