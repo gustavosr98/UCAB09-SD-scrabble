@@ -384,7 +384,9 @@ const actions = {
       }
     }
 
-    const imWinner = false; /* hacer */
+    const playerWinner = (state.players.sort((a, b) => b.score - a.score))[0];
+    const imWinner = playerWinner.id === state.playerId ? true : false; 
+    
     if (allPlayersPassed && imWinner) {
       await dispatch("reportScore");
     }
