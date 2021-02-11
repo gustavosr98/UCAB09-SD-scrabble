@@ -7,7 +7,7 @@ import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 const gamesRepository = new GamesRepository();
 const usersRepository = new UsersRepository();
 
-const TURN_TIMER_INITIAL = 300;
+const TURN_TIMER_INITIAL = 60;
 const KICK_OUT_TIMER_INITIAL = 60;
 
 // Initial State object
@@ -274,18 +274,19 @@ const actions = {
   // TURN ACTIONS
   async tellNextPlayerToPlay({ dispatch, commit, state }, playingPlayerId) {
     const playingPlayerIndex = state.players.findIndex(
-      p => p?.user.id === playingPlayerId
+      p => p?.info.id === playingPlayerId
     );
+
     let nextPlayerId = null;
     if (playingPlayerIndex + 1 === state.players.length) {
       nextPlayerId = state.players.find(
-        p => !p?.wasKickedOut && p?.user.id !== playingPlayerId
+        p => !p?.wasKickedOut && p?.info.id !== playingPlayerId
       );
     } else {
       nextPlayerId = state.players.find(
         (p, index) =>
           !p?.wasKickedOut &&
-          p?.user.id !== playingPlayerId &&
+          p?.info.id !== playingPlayerId &&
           index > playingPlayerIndex
       );
     }
