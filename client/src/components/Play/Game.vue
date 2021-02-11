@@ -101,6 +101,7 @@ export default {
     async findGameInfo() {
       this.userGame = await this.$store.dispatch("users/getUserGame", {idUser:this.user.id, idGame:this.game.id});
       this.gameInfo = await this.$store.dispatch("games/getGameWithUsers", this.game.id);
+      console.log("here",this.userGame, this.gameInfo)
       this.setPlayers()
     },
     setPlayers() {

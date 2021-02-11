@@ -390,7 +390,7 @@ export default {
       }
     }
   },
-  mount() {
+  mounted() {
     this.loading = true;
     this.currentPlayer = this.players[0];
     this.initGameBoard();
