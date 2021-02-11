@@ -355,7 +355,9 @@ const actions = {
   },
   // ENDGAME
   async checkGameover({ dispatch }) {
-    const twoRoundsPassing = false; /* hacer */
+    // const twoRoundsPassing = state.movesHistory.map(move => move.words.length === 0); /* hacer */
+    // const state.players.map(p=> !p.wasKickedOut);
+
     const imWinner = false; /* hacer */
     if (twoRoundsPassing && imWinner) {
       await dispatch("reportScore");
