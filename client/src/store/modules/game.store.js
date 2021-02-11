@@ -363,39 +363,39 @@ const actions = {
   // ENDGAME
   async checkGameover({ dispatch }) {
     // allPlayersPassed
+
     const totalPlayers = state.players.filter(player => !player?.wasKickedOut);
     let allPlayersPassed = true;
-
     for (let player of totalPlayers) {
       let playerRoundsPassing = 0;
       let i = state.movesHistory.length - 1;
       let playerMove;
-
       while (playerRoundsPassing < 2 && allPlayersPassed && i >= 0) {
         playerMove = state.movesHistory[i];
-        if (playerMove.alias == player.idGame) {
-          if (playerMove.words == "") {
+        if (playerMove.alias === player.idGame) {
+          if (playerMove.words === "") {
             playerRoundsPassing++;
           } else {
             allPlayersPassed = false;
           }
         }
-
         i--;
       }
 
-      if (allPlayersPassed == false) {
+      if (!allPlayersPassed) {
         break;
       }
     }
 
-    // imWinner
     const playerWinner = state.players.sort((a, b) => b.score - a.score)[0];
-    const imWinner = playerWinner.id === state.playerId ? true : false;
+    const imWinner = playerWinner.id === state.playerId;
 
-    if (allPlayersPassed && imWinner) {
-      await dispatch("reportScore");
-    }
+    console.log(allPlayersPassed);
+    console.log(playerWinner);
+    console.log(imWinner);
+    // if (allPlayersPassed && imWinner) {
+    //   await dispatch("reportScore");
+    // }
   },
   async reportScore({ dispatch, commit, state }) {
     console.log(state.userGame);

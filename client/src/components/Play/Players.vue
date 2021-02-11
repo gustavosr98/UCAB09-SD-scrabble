@@ -10,7 +10,7 @@
           v-for="(p, i) in playersList"
           :key="i"
           justify="space-around"
-          :class="p.turn && 'players-specific'"
+          :class="{ 'red--text': p.wasKickedOut, 'player-with-turn': p.turn }"
           class="players-items"
         >
           <p class="mb-1">{{ p.idGame }}</p>
@@ -48,7 +48,9 @@ export default {
   font-weight: lighter;
 }
 
-.players-specific {
+.player-with-turn {
   font-weight: bold;
+  text-decoration: underline;
+  text-decoration-color: white;
 }
 </style>
