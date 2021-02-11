@@ -1,4 +1,4 @@
-import { Controller, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Crud, CrudController, CrudRequest, Override, ParsedRequest } from '@nestjsx/crud';
 
 import { Game } from '@/entities';
@@ -27,5 +27,11 @@ export class GamesController implements CrudController<Game> {
         @Query('start') start: number = 1,
     ) {
         return this.service.getGames({ limit, start });
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id/users')
+    async getGame(@Param('id') id) {
+        return await this.service.getGame(id)
     }
 }

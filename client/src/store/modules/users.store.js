@@ -82,6 +82,15 @@ const actions = {
       commit("set", { key: "error", value: e.response });
     }
   },
+  async getUserGame({ commit }, {idUser, idGame}) {
+    try {
+      const response = await usersRepository.getUserGame(idUser, idGame);
+      commit("set", { key: "error", value: "" });
+      return response
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
   async updateProfile({ commit }, user) {
     try {
       const response = await usersRepository.updateUserProfile(user);
@@ -95,6 +104,15 @@ const actions = {
     try {
       await usersRepository.deleteAccount(userId);
       commit("set", { key: "error", value: "" });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async getGamesByUser({ commit }, {id}) {
+    try {
+      const response = await usersRepository.getGamesByUser(id);
+      commit("set", { key: "error", value: "" });
+      return response
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }

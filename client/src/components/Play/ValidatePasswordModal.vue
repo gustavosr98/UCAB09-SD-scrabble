@@ -3,28 +3,30 @@
     <v-card class="text-center">
       <v-card-actions class="headline primary justify-center py-6 word-break white--text modal-title">
         <v-spacer></v-spacer>
-        <h3 >Crear Sala</h3>
+        <h3 >Acceder a la Sala</h3>
         <v-spacer></v-spacer>
         <v-btn @click="cancelAction" class="mr-4" icon dark color="grey">
           <v-icon dark color="white">mdi-close</v-icon>
         </v-btn>
       </v-card-actions>
       <v-spacer />
-      <v-card-text class="mt-5 word-break">¿Desea establecer una contraseña en la sala? (Opcional)</v-card-text>
+      <v-card-text class="mt-5 word-break">Escribe la contraseña para acceder a esta sala</v-card-text>
       <v-row class="justify-center">
         <v-col cols="12" xs="12" sm="5" md="10">
           <v-text-field
-            v-model="accessPassword"
+            v-model="password"
             autofocus
-            @keyup.enter="create"
+            @keyup.enter="access"
             required
             :type="showPassword ? 'text' : 'password'"
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
+            :rules="rules"
             class="border"
             label="Contraseña de sala"
             maxLength="50"
             outlined
+            ref="form"
           ></v-text-field>
           
           <v-btn
@@ -32,9 +34,8 @@
             color="primary"
             dark
             block
-            :loading="loading"
-            @click="create"
-            >Crear</v-btn
+            @click="access"
+            >Acceder</v-btn
           >
         </v-col>
       </v-row>
@@ -43,44 +44,30 @@
 </template>
 
 <script>
-import { STATUS } from "@/config/constants.js";
-
 export default {
   props: {
     showModal: { type: Boolean, required: true },
+    accessPassword: { type: String, required: true }
   },
   data() {
     return {
-      accessPassword: null,
-      loading: false,
+      password: '',
       showPassword: false,
+      rules: [
+        v => !!v || "Debes introducir la contraseña",
+        v => (v === this.accessPassword) || "Contraseña incorrecta",
+      ],
     }
   },
   methods: {
-    async create() {
-      this.loading = true;
-      const game = { 
-        accessPassword: this.accessPassword,
-        userGames: [
-          {
-            totalPoints: 0,
-            isHost: true,
-            user: {
-              id: this.$store.getters["users/get"]("user").id,
-            }  
-          }
-        ],
-        status: { 
-          id: STATUS.CREATED 
-        },
+    async access() {
+      if (this.$refs.form.validate() && this.password === this.accessPassword) {
+        this.$emit("redirectToGame");
+        this.$emit("showDialog", false);
       }
-      await this.$store.dispatch("games/create", game);
-      this.loading = false;
-      this.$emit("showDialog", false);
-      this.$router.push({ name: "Game" });
     },
     cancelAction() {
-      this.accessPassword = null
+      this.password = null
       this.$emit("showDialog", false);
     }
   },

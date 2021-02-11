@@ -16,10 +16,11 @@
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
+          append-inner-icon="mdi-close"
+          @click:append="search = ''"
           label="Buscar"
           single-line
           hide-details
-          clearable
         ></v-text-field>
         <v-btn
           @click="reload"
@@ -77,7 +78,7 @@ export default {
     async fetchUsers() {
       this.loading = true;
 
-      const { page, itemsPerPage, sortBy, sortDesc } = this.options;
+      const { page, itemsPerPage } = this.options;
 
       const fetched = await this.$store.dispatch("users/getRanking", {
         limit: page * itemsPerPage,
@@ -102,6 +103,7 @@ export default {
       return [];
     },
     reload() {
+      this.search = "";
       this.fetchUsers()
     }
   },

@@ -12,4 +12,16 @@ export default class GamesRepository extends Repository {
   async createGame(game) {
     return this.create(game);
   }
+
+  async getGame(id) {
+    return this.get(id);
+  }
+
+  async getGameWithUsers(id) {
+    return await this.httpClient.get(`games/${id}/users`);
+  }
+
+  async createUserGame(userGame) {
+    return this.httpClient.post('user-game', userGame);
+  }
 }

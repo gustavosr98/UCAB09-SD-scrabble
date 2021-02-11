@@ -3,6 +3,7 @@ const gamesRepository = new GamesRepository();
 
 const initialState = () => {
   return {
+    game: "",
     games: [],
     error: "",
   };
@@ -29,9 +30,9 @@ const mutations = {
 };
 
 const actions = {
-  async getMany({ commit }, { limit, page }) {
+  async getMany({ commit }, { limit, page, search }) {
     try {
-      const response = await gamesRepository.getGames(limit, page);
+      const response = await gamesRepository.getGames(limit, page, search);
       commit("set", { key: "error", value: "" });
       commit("set", { key: "games", value: response });
     } catch (e) {
@@ -40,11 +41,40 @@ const actions = {
   },
   async create({ commit }, game) {
     try {
-      await gamesRepository.createGame(game);
+      const response = await gamesRepository.createGame(game);
+      commit("set", { key: "game", value: response });
       commit("set", { key: "error", value: "" });
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }
+  },
+  async getOne({ commit }, id) {
+    try {
+      const response = await gamesRepository.getGame(id);
+      console.log(response)
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async getGameWithUsers({ commit }, id) {
+    try {
+      const response = await gamesRepository.getGameWithUsers(id);
+      commit("set", { key: "error", value: "" });
+      return response
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  async createUserGame({ commit }, userGame) {
+    try {
+      const response = await gamesRepository.createUserGame(userGame);
+      commit("set", { key: "error", value: "" });
+    } catch (e) {
+      commit("set", { key: "error", value: e.response });
+    }
+  },
+  setGame({ commit }, game) {
+    commit("set", { key: "game", value: game });
   },
   reset({ commit }) {
     commit("reset");

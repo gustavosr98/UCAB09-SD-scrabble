@@ -18,7 +18,6 @@ export class GamesService extends TypeOrmCrudService<Game> {
 
     public async getGames({ limit, start }): Promise<{ data: Game[]; count: number }> {
         start = limit * (start - 1);
-        
         const query: SelectQueryBuilder<Game> = this.gamesRepository
             .createQueryBuilder('games')
             .innerJoinAndSelect('games.userGames', 'userGames')
@@ -29,10 +28,13 @@ export class GamesService extends TypeOrmCrudService<Game> {
             .take(limit);
         
         const games: [Game[], number] = await query.getManyAndCount();
-
         return {
             data: games[0],
             count: games[1],
         }
+    }
+
+    public async getGame(id) {
+        return await this.repo.findOne(id, { relations: ['status', 'userGames', 'userGames.user'] })
     }
 }

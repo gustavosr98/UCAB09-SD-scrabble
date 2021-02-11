@@ -28,4 +28,12 @@ export default class UsersRepository extends Repository {
   async getUserGameStatistics(userId) {
     return await this.get(`game-statistics/${userId}`);
   }
+  
+  async getUserGame(idUser, idGame) {
+    return await this.httpClient.get(`user-game/users/${idUser}/games/${idGame}`);
+  }
+
+  async getGamesByUser(id) {
+    return await this.httpClient.get(`users/${id}/user-games`);
+  }
 }

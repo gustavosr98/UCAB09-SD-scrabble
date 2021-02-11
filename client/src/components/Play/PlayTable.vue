@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="games-table">
     <v-row justify="space-around" class="pt-0">
       <v-col cols="12" sm="3" class="pl-0 mt-10">
         <h2 class="font-weight-light d-flex justify-start">Lista de Salas</h2>
@@ -44,6 +44,8 @@
           :loading="loading"
           no-data-text="No hay salas activas en la aplicación"
           class="elevation-1 px-0"
+          :options.sync="options"
+          :server-items-length="count"
         >
           <template v-slot:[`item.private`]="{ item }">
             <v-btn v-if="item.private" icon color="light" x-small>
@@ -51,7 +53,7 @@
             </v-btn>
           </template>
           <template v-slot:[`item.access`]="{ item }">
-            <v-btn v-if="item.access" color="primary" dark @click="accessGame(item.id)" x-small>
+            <v-btn v-if="item.access" color="primary" dark @click="accessGame(item)" x-small>
               <v-icon dark>mdi-door</v-icon>
             </v-btn>
           </template>
@@ -62,21 +64,31 @@
       :showModal="createDialog"
       @showDialog="showDialog"
     />
+    <ValidatePasswordModal
+      :showModal="createValidateDialog"
+      :accessPassword="accessPassword"
+      @redirectToGame="redirectToGame"
+      @showDialog="showValidateDialog"
+    />
   </v-container>
 </template>
 
 <script>
 import PlayFormModal from "./PlayFormModal.vue";
+import ValidatePasswordModal from "./ValidatePasswordModal.vue";
+import { mapMutations } from "vuex";
 
 export default {
   name: "play-table",
   components: {
-    PlayFormModal
+    PlayFormModal,
+    ValidatePasswordModal
   },
   data() {
     return {
       loading: false,
       createDialog: false,
+      createValidateDialog: false,
       items: [],
       search: "",
       limit: 10,
@@ -88,9 +100,14 @@ export default {
         { text: "Privado", value: "private", align: "center" },
         { text: "Entrar", align: "start", sortable: false, value: "access" },
       ],
+      count: 0,
+      options: {},
+      game: {},
+      accessPassword: ''
     }
   },
   methods: {
+    ...mapMutations("ux", ["setBackgroundDark"]),
     async refreshContent() {
       this.search = "";
       this.limit = 10;
@@ -99,11 +116,15 @@ export default {
     },
     async loadGames() {
       this.loading = true;
-      await this.$store.dispatch("games/getMany", { limit: this.limit, page: this.page });
+
+      const { page, itemsPerPage } = this.options;
+
+      await this.$store.dispatch("games/getMany", { limit: page * itemsPerPage, page: (page - 1) * itemsPerPage });
 
       const games = this.$store.getters["games/get"]("games");
 
       if (games.data) {
+        this.count = games.count
         this.items = games.data.map((game) => {
           const hostFound = game.userGames.find((userGame) => userGame.isHost === true);
           
@@ -115,6 +136,7 @@ export default {
             totalUsersPlaying: game.userGames.length,
             private: !!game.accessPassword,
             access: game.userGames.length < 4,
+            accessPassword: game.accessPassword,
           }
         });
   
@@ -125,17 +147,64 @@ export default {
       this.createDialog = value;
       await this.loadGames();
     },
-    accessGame() {
-      this.$router.push({ name: "Ranking" });
+    showValidateDialog(value) {
+      this.createValidateDialog = value;
+    },
+    async accessGame(game) {
+      this.game = game
+      if(this.game.private) {
+        this.accessPassword = this.game.accessPassword
+        this.showValidateDialog(true)
+      } else {
+        this.redirectToGame()
+      }
+    },
+    async redirectToGame() {
+      const userGames = {
+        totalPoints: 0,
+        isHost: false,
+        user: {
+          id: this.$store.getters["users/get"]("user").id,
+        },
+        game: {
+          id: this.game.id
+        }  
+      }
+      await this.$store.dispatch("games/createUserGame", userGames);
+
+      this.$store.commit("games/set", { key: "game", value: this.game });
+      this.$router.push({ name: "Game" });
+    },
+    async validateGame() {
+      const userGame = await this.$store.dispatch("users/getGamesByUser", {id: this.$store.getters["users/get"]("user").id})
+      if (userGame) {
+        this.$store.commit("games/set", { key: "game", value: userGame.userGames[0].game });
+        this.$router.push({ name: "Game" });
+      }
     }
   },
+  watch: {
+    options: {
+      async handler() {
+        await this.loadGames(); 
+      },
+      deep: true,
+    },
+  },
   async mounted() {
+    // await this.validateGame()
     await this.loadGames();
+  },
+  created() {
+    this.setBackgroundDark({value: false})
   }
 };
 </script>
 
 <style scope>
+.games-table {
+  background-color: white;
+}
 .rounded-corner {
   border-radius: 10px;
 }

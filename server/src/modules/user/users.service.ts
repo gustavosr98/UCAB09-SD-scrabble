@@ -1,14 +1,15 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
+import { UpdateResult } from 'typeorm';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 import { User } from '@/entities';
 import { EncryptionManagerService } from '@/encryption/encryption-manager.service';
 import { ScrabbleException } from '@/common/exceptions/abstract.exception';
 import { StatusErrorCodes } from '@/common/enums/status-error-codes.enum';
 import { Status } from '@/common/enums/constants';
-import { UpdateResult } from 'typeorm';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<User> {
@@ -223,5 +224,17 @@ export class UsersService extends TypeOrmCrudService<User> {
             `
         );
         return { ranking, count: Number(count[0].count) }
+    }
+
+    public async getGamesByUser(id) {
+        const query = this.repo
+            .createQueryBuilder('users')
+            .innerJoinAndSelect('users.userGames', 'userGames')
+            .innerJoinAndSelect('userGames.game', 'games')
+            .innerJoinAndSelect('games.status', 'status')
+            .andWhere(`games.status != ${Status.FINISHED}`)
+            .andWhere(`users.id = ${id}`)
+
+        return await query.getOne()
     }
 }
