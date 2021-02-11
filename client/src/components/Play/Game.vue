@@ -12,7 +12,7 @@
           <players :playersList="playersList" />
         </v-row>
         <v-row justify="center" class="mb-7">
-          <moves :movesList="movesList" />
+          <moves :movesList="$store.state.game.movesHistory" />
         </v-row>
         <v-row justify="center">
           <actions
@@ -24,8 +24,14 @@
         </v-row>
       </v-col>
       <v-col cols="8">
-        <board v-if="playersList.length" ref="board" :user="user" :userPlayer="userPlayer" :players="playersList"/>
-          <v-progress-circular v-else size="70" indeterminate color="white" class="d-flex justify-content-center"></v-progress-circular>
+        <board v-if="playersList.length" ref="board" />
+        <v-progress-circular
+          v-else
+          size="70"
+          indeterminate
+          color="white"
+          class="d-flex justify-content-center"
+        ></v-progress-circular>
       </v-col>
     </v-row>
     <!-- MODALS -->
@@ -48,6 +54,7 @@ import Players from "@/components/Play/Players";
 import Moves from "@/components/Play/Moves";
 import Actions from "@/components/Play/Actions";
 import Board from "@/components/Play/Board.vue";
+const toKV = (key, value) => ({ key, value });
 
 import { mapMutations } from "vuex";
 
@@ -69,49 +76,15 @@ export default {
       game: {},
       user: {},
       gameInfo: {},
-      userPlayer:null,
-      playersList: [],
-      movesList: [
-        {
-          id: "P1",
-          word: "hola",
-          points: 12,
-        },
-        {
-          id: "P2",
-          word: "chao",
-          points: 3,
-        },
-        {
-          id: "P3",
-          word: "prueba",
-          points: 12,
-        },
-        {
-          id: "P4",
-          word: "copa",
-          points: 2,
-        },
-        {
-          id: "P3",
-          word: "prueba",
-          points: 12,
-        },
-        {
-          id: "P4",
-          word: "copa",
-          points: 2,
-        },
-      ],
     };
   },
   methods: {
     ...mapMutations("ux", ["setBackgroundDark"]),
 
-    sendMove() {
-      this.$refs.board.validate();
+    async sendMove() {
+      await this.$refs.board.validate();
     },
-    startGame(){
+    startGame() {
       this.$refs.board.generateLettersDeck();
     },
     async findGameInfo() {
@@ -124,25 +97,6 @@ export default {
         "games/getGameWithUsers",
         this.game.id
       );
-    },
-    setPlayers() {
-      console.log("pzoo",this.$store.state.game.players)
-      let players = this.$store.state.game.players;
-      console.log("tzoo",this.$store.state.game.turn)
-      let playerWithTurn = this.$store.state.game.turn.playerId;
-      this.playersList = players.map((ug, i) => {
-        return {
-          id: ug.info.id,
-          fullName: ug.info.fullName,
-          username: ug.info.username,
-          idGame: `P${i + 1}`,
-          score: ug.score,
-          hand: ug.tokens,
-          turn: ug.info.id == playerWithTurn
-        };
-      });
-      this.userPlayer= this.playersList.find(player=>player.id = this.user.id);
-      console.log("p",this.playersList, this.userPlayer)
     },
     async enterRoom() {
       if (this.userGame.isHost) {
@@ -158,15 +112,32 @@ export default {
       }
     },
   },
+  computed: {
+    playersList() {
+      return this.$store.state.game.players;
+    },
+    userPlayer() {
+      return (
+        this.playersList.find(p => p?.id === this.user.id) || {
+          id: null,
+          fullname: null,
+          username: null,
+          idGame: null,
+          isActive: null,
+          wasKickedOut: false,
+          hands: [],
+          score: null,
+          turn: null,
+        }
+      );
+    },
+  },
   async mounted() {
     this.setBackgroundDark({ value: true });
     this.user = this.$store.getters["users/get"]("user");
     this.game = this.$store.getters["games/get"]("game");
     await this.findGameInfo();
     await this.enterRoom();
-    this.setPlayers();
   },
 };
 </script>
-<style scoped>
-</style>

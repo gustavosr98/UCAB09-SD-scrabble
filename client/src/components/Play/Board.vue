@@ -1,80 +1,97 @@
 <template>
-  <v-container>      
-      <div>
-        <v-row v-for="(row,i) in board" :key="i" class="row-justify">
-          <div v-for="(cell, j) in board[i]" :key="i*15+j" @click="onBoardClick(i, j)">
-            <v-avatar size="45" tile class="cell" :class="{
-              'border-letter': gameStarted && userPlayer.turn,
-              'border-letter-locked': !gameStarted || !userPlayer.turn,
-              'selected': cell.selected,
-              'pending': cell == selectedBoardCell,
-              'locked': cell.isLocked,
-              'normal-letter': cell.effect!=EFFECTS.START && cell.effect!=EFFECTS.TRIPLE_WORD && cell.effect!=EFFECTS.TRIPLE_LETTER && cell.effect!=EFFECTS.DOUBLE_WORD && cell.effect!=EFFECTS.DOUBLE_LETTER,
-              'start-cell': cell.effect==EFFECTS.START,
-              'triple-word': cell.effect==EFFECTS.TRIPLE_WORD,
-              'triple-letter': cell.effect==EFFECTS.TRIPLE_LETTER,
-              'double-word': cell.effect==EFFECTS.DOUBLE_WORD,
-              'double-letter': cell.effect==EFFECTS.DOUBLE_LETTER}"
-            >
-              <span>
-                {{board[i][j].content}}
-              </span>
-            </v-avatar>
-          </div>
-        </v-row>
-        <br/>
-        <br/>
-        <v-row class="row-justify">
-          <v-avatar size="72" tile class="cell default hand mx-2"  
-            @click="onHandClick(i)"
-            v-for="(letter, i) in userPlayer.hand"
-            :key="i"
-            :class="{'locked': (!userPlayer.turn), 'pending': (userPlayer.turn) && i == selectedHandIndex}"
+  <v-container>
+    <div>
+      <v-row v-for="(row, i) in board" :key="i" class="row-justify">
+        <div
+          v-for="(cell, j) in board[i]"
+          :key="i * 15 + j"
+          @click="onBoardClick(i, j)"
+        >
+          <v-avatar
+            size="45"
+            tile
+            class="cell"
+            :class="{
+              'border-letter': gameStarted && turn,
+              'border-letter-locked': !gameStarted || !turn,
+              selected: cell.selected,
+              pending: cell == selectedBoardCell,
+              locked: cell.isLocked,
+              'normal-letter':
+                cell.effect != EFFECTS.START &&
+                cell.effect != EFFECTS.TRIPLE_WORD &&
+                cell.effect != EFFECTS.TRIPLE_LETTER &&
+                cell.effect != EFFECTS.DOUBLE_WORD &&
+                cell.effect != EFFECTS.DOUBLE_LETTER,
+              'start-cell': cell.effect == EFFECTS.START,
+              'triple-word': cell.effect == EFFECTS.TRIPLE_WORD,
+              'triple-letter': cell.effect == EFFECTS.TRIPLE_LETTER,
+              'double-word': cell.effect == EFFECTS.DOUBLE_WORD,
+              'double-letter': cell.effect == EFFECTS.DOUBLE_LETTER,
+            }"
           >
             <span>
-              {{letter}}
+              {{ board[i][j].content }}
             </span>
-            <sub>
-              {{letters[letter].score}}
-            </sub>
           </v-avatar>
-        </v-row>
-      </div>
+        </div>
+      </v-row>
+      <br />
+      <br />
+      <v-row class="row-justify">
+        <v-avatar
+          :if="userPlayer"
+          size="72"
+          tile
+          class="cell default hand mx-2"
+          @click="onHandClick(i)"
+          v-for="(letter, i) in hand"
+          :key="i"
+          :class="{
+            locked: !turn,
+            pending: turn && i == selectedHandIndex,
+          }"
+        >
+          <span>
+            {{ letter }}
+          </span>
+          <sub>
+            {{ letters[letter].score }}
+          </sub>
+        </v-avatar>
+      </v-row>
+    </div>
   </v-container>
 </template>
 
 <script>
 import _ from "lodash";
-import {LETTERS_DESTRIBUTION, BOARD_SPECIAL_CASES, EMPTY_CELL, W3, L3, W2, L2, SS, N0} from "@/config/constants.js";
+import {
+  LETTERS_DESTRIBUTION,
+  BOARD_SPECIAL_CASES,
+  EMPTY_CELL,
+  W3,
+  L3,
+  W2,
+  L2,
+  SS,
+  N0,
+} from "@/config/constants.js";
 
-let checkWord = require('check-if-word');
-let WORDS = checkWord('es');
- 
+const toKV = (key, value) => ({ key, value });
 
+let checkWord = require("check-if-word");
+let WORDS = checkWord("es");
 
 export default {
   name: "board",
-  props: {
-    user: {
-      type: Object,
-      required: true
-    },
-    userPlayer:{
-      type: Object,
-      required: true
-    },
-    players:{
-      type: Array,
-      required: true
-    }
-  },
   data: () => ({
     EFFECTS: {
       DOUBLE_LETTER: L2,
       DOUBLE_WORD: W2,
       TRIPLE_LETTER: L3,
       TRIPLE_WORD: W3,
-      START: SS
+      START: SS,
     },
     loading: true,
     board: [],
@@ -84,16 +101,31 @@ export default {
     letters: LETTERS_DESTRIBUTION,
     selectedBoardCell: null,
     gameStarted: false,
-    selectedHandIndex: -1
+    selectedHandIndex: -1,
   }),
+  computed: {
+    userPlayer() {
+      return this.$store.state.game.players.find(
+        p => p?.id === this.$store.state.game.playerId
+      );
+    },
+    turn() {
+      return (
+        this.$store.state.game.turn.playerId === this.$store.state.game.playerId
+      );
+    },
+    hand() {
+      return this.userPlayer?.hand || [];
+    },
+  },
   methods: {
     applyToBoard(f) {
       this.board.forEach(v => v.forEach(f));
     },
-    addLetters(letters){
-      for (let letter of letters){
-        this.board[letter.i][letter.j].content= letter.content;
-        this.board[letter.i][letter.j].isLocked= true;
+    addLetters(letters) {
+      for (let letter of letters) {
+        this.board[letter.i][letter.j].content = letter.content;
+        this.board[letter.i][letter.j].isLocked = true;
       }
     },
     hasAdjacentCell(cell) {
@@ -121,10 +153,15 @@ export default {
       return selectedCells;
     },
     getSelectedCellsAlignement(selectedCells) {
-      console.log(selectedCells.some(cell => this.board[cell.i][cell.j].effect == this.EFFECTS.START))
+      console.log(
+        selectedCells.some(
+          cell => this.board[cell.i][cell.j].effect == this.EFFECTS.START
+        )
+      );
       if (
-        !selectedCells.some(cell => this.board[cell.i][cell.j].effect ==
-          this.EFFECTS.START) &&
+        !selectedCells.some(
+          cell => this.board[cell.i][cell.j].effect == this.EFFECTS.START
+        ) &&
         !selectedCells.some(cell => this.hasAdjacentCell(cell))
       )
         return false;
@@ -194,20 +231,16 @@ export default {
 
       return words;
     },
-    validate() {
-      
+    async validate() {
       let selectedCells = this.getSelectedCells();
       let direction = this.getSelectedCellsAlignement(selectedCells);
       let isAligned = direction == "horizontal" || direction == "vertical";
       let words = isAligned
         ? this.getFormedWords(selectedCells, direction, this.board)
         : [];
-      
-      let isWordValid = words.every(
-        word =>   WORDS.check(word.toLowerCase())
-      );
 
-      console.log(direction, isAligned, words);
+      let isWordValid = words.every(word => WORDS.check(word.toLowerCase()));
+
       if (isAligned && isWordValid) {
         this.applyToBoard(cell => {
           if (cell.selected && cell.content != EMPTY_CELL) {
@@ -216,15 +249,21 @@ export default {
           }
         });
 
-        this.computeScore(words, selectedCells);
-
-        this.nextTurn();
-        this.fillHands();
+        const roundScore = await this.computeScore(words, selectedCells);
+        await this.setUserPlayer({
+          ...this.userPlayer,
+          score: this.userPlayer.score + roundScore,
+        });
+        await this.$store.dispatch("game/sendMove", {
+          words,
+          points: roundScore,
+        });
+        await this.$store.dispatch("game/fillHands");
       } else {
-        this.cancel();
+        await this.cancel();
       }
     },
-    computeScore(words, selectedCells) {
+    async computeScore(words, selectedCells) {
       let score = 0;
       for (let word of words)
         for (let letter of word) score += LETTERS_DESTRIBUTION[letter].score;
@@ -261,46 +300,58 @@ export default {
             break;
         }
       }
-      this.userPlayer.score += score;
+
+      return score;
     },
-    nextTurn() {
-      /*this.userPlayer =
-        this.userPlayer == this.player
-          ? this.players[1]
-          : this.player;*/
+    async setUserPlayer(userPlayer) {
+      await this.$store.dispatch("game/updateUserPlayer", userPlayer);
     },
-    cancel() {
+    async cancel() {
       this.selectedBoardCell = null;
       this.waiting = false;
       // Reset Board
-      this.applyToBoard(cell => {
+      this.applyToBoard(async cell => {
         if (cell.selected && cell.content != EMPTY_CELL) {
-          this.userPlayer.hand.push(cell.content);
+          await this.setUserPlayer({
+            ...this.userPlayer,
+            hand: [...this.userPlayer.hand, cell.content],
+          });
+
           cell.content = EMPTY_CELL;
           cell.selected = false;
         }
         cell.selected = false;
       });
     },
-    insertLetter() {
+    async insertLetter() {
       if (this.selectedBoardCell.content != EMPTY_CELL)
-        this.userPlayer.hand.push(this.selectedBoardCell.content);
+        await this.setUserPlayer({
+          ...this.userPlayer,
+          hand: [...this.userPlayer.hand, this.selectedBoardCell.content],
+        });
+
       this.selectedBoardCell.content = this.userPlayer.hand[
         this.selectedHandIndex
       ];
-      this.userPlayer.hand.splice(this.selectedHandIndex, 1);
+
+      await this.setUserPlayer({
+        ...this.userPlayer,
+        hand: this.userPlayer.hand.filter(
+          (h, i) => i !== this.selectedHandIndex
+        ),
+      });
+
       this.selectedBoardCell = null;
       this.selectedHandIndex = -1;
     },
-    onHandClick(i) {
-      if (!this.userPlayer.turn) return;
+    async onHandClick(i) {
+      if (!this.turn) return;
       this.selectedHandIndex = i;
 
       if (this.selectedBoardCell && this.selectedHandIndex > -1)
-        this.insertLetter();
+        await this.insertLetter();
     },
-    onBoardClick(i, j) {
-      
+    async onBoardClick(i, j) {
       // Prevent click on locked cells
       if (this.board[i][j].isLocked) return;
 
@@ -310,7 +361,10 @@ export default {
         this.board[i][j].selected &&
         this.board[i][j].content != EMPTY_CELL
       ) {
-        this.userPlayer.hand.push(this.board[i][j].content);
+        await this.setUserPlayer({
+          ...this.userPlayer,
+          hand: [...this.userPlayer.hand, this.board[i][j].content],
+        });
         this.board[i][j].content = EMPTY_CELL;
       }
 
@@ -319,7 +373,7 @@ export default {
         this.selectedBoardCell = this.board[i][j];
         this.selectedBoardCell.selected = true;
 
-        this.insertLetter();
+        await this.insertLetter();
         return;
       }
 
@@ -362,51 +416,48 @@ export default {
               content: EMPTY_CELL,
               effect: getSpecialCaseValue(i, j),
               isLocked: false,
-              selected: false
+              selected: false,
             }))
         );
     },
-    generateLettersDeck() {
-      this.gameStarted= true;
-      this.lettersDeck = [];
-      console.log(LETTERS_DESTRIBUTION);
+    async generateLettersDeck() {
+      console.log("AAAAAAA");
+      this.gameStarted = true;
+      this.$store.state.game.lettersDeck = [];
+
       for (let letter in LETTERS_DESTRIBUTION) {
-        this.lettersDeck = this.lettersDeck.concat(
+        this.$store.state.game.lettersDeck = this.$store.state.game.lettersDeck.concat(
           Array(LETTERS_DESTRIBUTION[letter].count)
             .fill(" ")
             .map(l => LETTERS_DESTRIBUTION[letter].letter)
         );
       }
-      this.lettersDeck = _.shuffle(this.lettersDeck);
-      this.fillHands();
+
+      this.$store.state.game.lettersDeck = _.shuffle(
+        this.$store.state.game.lettersDeck
+      );
+      await this.$store.dispatch("game/fillHands");
     },
-    fillHands() {
-      for (let player of this.players) {
-        while (player.hand.length < 7) player.hand.push(this.lettersDeck.pop());
-      }
-      this.userPlayer.hand= this.players.find(player=>player.id = this.userPlayer.id).hand;
-    }
   },
-  mounted() {
+  async mounted() {
     this.loading = true;
     this.initGameBoard();
     this.cancel();
-    console.log("user", this.user);
     this.loading = false;
-  }
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 $primary-color: #27ae60;
 $cell-size: 24px;
 
-.board-background{
-  background-color: #005432
+.board-background {
+  background-color: #005432;
 }
 
-.row-justify{
+.row-justify {
   justify-content: center;
 }
 .container {
@@ -419,34 +470,34 @@ $cell-size: 24px;
 .score-row {
 }
 
-.border-letter{
+.border-letter {
   border: solid 2px black !important;
   &:hover {
-      border: 2px solid red !important;
-    }
+    border: 2px solid red !important;
+  }
 }
 
-.border-letter-locked{
+.border-letter-locked {
   border: solid 2px black !important;
 }
 
 .double-letter {
-  background-color: rgb(38,205,239);
+  background-color: rgb(38, 205, 239);
 
   &.selected {
     background-color: rgb(177, 255, 255) !important;
   }
 }
 
-.hand{
+.hand {
   border-radius: 10px !important;
   &:hover {
-      border: 2px solid red !important;
-    }
+    border: 2px solid red !important;
+  }
 }
 
 .normal-letter {
-  background-color: rgb(0,84,50);
+  background-color: rgb(0, 84, 50);
 
   &.selected {
     background-color: rgb(177, 255, 255) !important;
@@ -454,25 +505,25 @@ $cell-size: 24px;
 }
 
 .triple-letter {
-  background-color: rgb(0,133,231); 
+  background-color: rgb(0, 133, 231);
   &.selected {
-    background-color: rgb(43, 100, 253)!important;
+    background-color: rgb(43, 100, 253) !important;
   }
 }
 
 .double-word {
-  background-color: rgb(255,167,169);
+  background-color: rgb(255, 167, 169);
 }
 
 .triple-word {
-  background-color: rgb(246,85,90);
+  background-color: rgb(246, 85, 90);
   &.selected {
     background-color: rgb(247, 189, 168) !important;
   }
 }
 
 .start-cell {
-  background-color: rgb(246,85,90);
+  background-color: rgb(246, 85, 90);
   &.selected {
     background-color: rgb(255, 94, 73) !important;
   }

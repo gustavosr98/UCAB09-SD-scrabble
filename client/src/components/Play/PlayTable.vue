@@ -204,7 +204,7 @@ export default {
     },
   },
   async mounted() {
-    await this.validateGame();
+    // await this.validateGame();
     await this.loadGames();
   },
   created() {

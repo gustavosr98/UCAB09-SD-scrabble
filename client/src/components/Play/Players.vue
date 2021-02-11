@@ -5,7 +5,7 @@
       <p class="ml-5 mb-0">Jugadores</p>
     </v-row>
     <v-row justify="center" align="center" class="mt-5">
-      <v-col class="players-content pt-5">
+      <v-col class="players-content pt-5" :if="playersList">
         <v-row
           v-for="(p, i) in playersList"
           :key="i"
@@ -23,26 +23,13 @@
 </template>
 
 <script>
-
 export default {
   name: "players",
-  components: {
-  },
   props: {
     playersList: {
       type: Array,
-      required: true
-    }
-  },
-  data() {
-    return {
-    };
-  },
-  computed: {
-	},
-  methods: {
-	},
-  mounted() {
+      required: true,
+    },
   },
 };
 </script>
@@ -53,7 +40,7 @@ export default {
 }
 
 .players-content {
-  background-color:rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.2);
   width: 100%;
 }
 

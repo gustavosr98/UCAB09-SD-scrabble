@@ -5,7 +5,12 @@
         <v-row v-if="isHost" justify="center">
           <v-icon color="white">mdi-play</v-icon>
           <v-col cols="10">
-            <v-btn block @click="startGame()" :disabled="isGameInProgress"
+            <v-btn
+              block
+              @click="startGame()"
+              :disabled="
+                isGameInProgress || this.$store.state.game.players.length <= 1
+              "
               >Empezar juego</v-btn
             >
           </v-col>
@@ -81,7 +86,9 @@ export default {
       this.$emit("startGame");
     },
     take() {},
-    pass() {},
+    async pass() {
+      await this.$store.dispatch("game/pass");
+    },
     async goOut() {
       await this.$store.dispatch(
         "game/exitRoom",

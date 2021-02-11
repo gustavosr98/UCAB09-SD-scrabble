@@ -7,7 +7,7 @@ import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 const gamesRepository = new GamesRepository();
 const usersRepository = new UsersRepository();
 
-const TURN_TIMER_INITIAL = 60;
+const TURN_TIMER_INITIAL = 300;
 const KICK_OUT_TIMER_INITIAL = 60;
 
 // Initial State object
@@ -34,7 +34,13 @@ const initialState = () => {
     players: [],
     status: null,
     lettersDeck: [],
-    movesHistory: [],
+    movesHistory: [
+      {
+        alias: "P1",
+        words: "hola",
+        points: 12,
+      },
+    ],
     board: [],
     actualRound: null,
     turn: {
@@ -49,7 +55,7 @@ const toKV = (key, value) => ({ key, value });
 const state = initialState();
 
 const getPlayer = (state, id) => {
-  return state.players.find(p => p?.info.id === id);
+  return state.players.find(p => p?.id === id);
 };
 
 // Getter functions
@@ -146,12 +152,13 @@ const actions = {
       await zkClient.setData(`/room-${roomId}`, {
         players: [
           {
-            info: user,
+            ...user,
+            idGame: `P${state.players.length + 1}`,
             isActive: true,
-            timeLeftToCickOut: 300,
             wasKickedOut: false,
-            tokens: [],
-            score:0
+            hand: [],
+            score: 0,
+            turn: state.turn.playerId === user.id,
           },
         ],
         status: ROOM_STATUS.CREATED,
@@ -180,12 +187,13 @@ const actions = {
         toKV("players", [
           ...state.players,
           {
-            info: user,
+            ...user,
+            idGame: `P${state.players.length + 1}`,
             isActive: true,
-            timeLeftToCickOut: 300,
             wasKickedOut: false,
-            tokens: [],
-            score:0
+            hand: [],
+            score: 0,
+            turn: state.turn.playerId === user.id,
           },
         ])
       );
@@ -227,18 +235,12 @@ const actions = {
       clearInterval(state.kickOutInterval);
     }
   },
-  async kickOutOfRoomForcely({ dispatch, commit, state }, playerId) {
-    commit(
-      "set",
-      toKV(
-        "players",
-        state.players.map(p => {
-          if (p?.info.id === playerId) {
-            p.info.wasKickedOut = true;
-          } else if (p?.info.id) return p;
-        })
-      )
-    );
+  async kickOutOfRoomForcely({ dispatch, state }, playerId) {
+    state.players.map(p => {
+      if (p?.id === playerId) {
+        p.wasKickedOut = true;
+      }
+    });
 
     await dispatch("updateRoom");
 
@@ -257,9 +259,7 @@ const actions = {
       "set",
       toKV(
         "players",
-        state.players.map(p => {
-          if (p?.info.id !== playerId) return p;
-        })
+        state.players.filter(p => p?.id !== playerId)
       )
     );
     await dispatch("updateRoom");
@@ -276,29 +276,29 @@ const actions = {
   // TURN ACTIONS
   async tellNextPlayerToPlay({ dispatch, commit, state }, playingPlayerId) {
     const playingPlayerIndex = state.players.findIndex(
-      p => p?.info.id === playingPlayerId
+      p => p?.id === playingPlayerId
     );
 
-    let nextPlayerId = null;
+    let nextPlayer = null;
     if (playingPlayerIndex + 1 === state.players.length) {
-      nextPlayerId = state.players.find(
-        p => !p?.wasKickedOut && p?.info.id !== playingPlayerId
+      nextPlayer = state.players.find(
+        p => !p?.wasKickedOut && p?.id !== playingPlayerId
       );
     } else {
-      nextPlayerId = state.players.find(
+      nextPlayer = state.players.find(
         (p, index) =>
           !p?.wasKickedOut &&
-          p?.info.id !== playingPlayerId &&
+          p?.id !== playingPlayerId &&
           index > playingPlayerIndex
       );
     }
 
-    if (nextPlayerId) {
+    if (nextPlayer) {
       commit(
         "set",
         toKV("turn", {
           ...state.turn,
-          playerId: nextPlayerId,
+          playerId: nextPlayer.id,
         })
       );
       await dispatch("updateRoom");
@@ -308,12 +308,28 @@ const actions = {
     }
   },
   // TURN ACTIONS / PLAY
-  async sendMove({ dispatch }, tokens /*Token[]*/) {
+  async sendMove({ dispatch, state }, { words, points }) {
+    state.movesHistory = [
+      ...state.movesHistory,
+      {
+        alias: state.players.find(p => p?.id === state.playerId)?.idGame,
+        words: words.reduce((total, w) => `${total}, ${w}`, ""),
+        points,
+      },
+    ];
     await dispatch("tellNextPlayerToPlay", state.playerId);
   },
   // TURN ACTIONS / PASS
   async pass({ dispatch, state }) {
-    // make empty move
+    state.movesHistory = [
+      ...state.movesHistory,
+      {
+        alias: state.players.find(p => p?.id === state.playerId)?.idGame,
+        words: "",
+        points: 0,
+      },
+    ];
+
     await dispatch("tellNextPlayerToPlay", state.playerId);
   },
   // TURN ACTIONS / CHANGE_TOKENS
@@ -334,7 +350,8 @@ const actions = {
     dispatch("updateRoom");
     await gamesRepository.updateGameStatus(state.userGame.game.id, 3);
     await gamesRepository.updateUserGame(state.userGame.id, {
-      totalPoints: 100 /* cambiar */,
+      totalPoints:
+        state.players.find(p => (p?.id = state.playerId))?.score || 0,
       isHost: state.userGame.isHost,
       wasKickedOut: false,
     });
@@ -370,7 +387,7 @@ const actions = {
           "kickOutInterval",
           setInterval(async () => {
             state.players.map(async p => {
-              let playerId = p?.info.id;
+              let playerId = p?.id;
               if (playerId && playerId !== state.playerId) {
                 const isActive = await zkClient.exists(
                   `/room-${state.roomId}/${playerId}`
@@ -411,10 +428,31 @@ const actions = {
       );
     }
   },
+  // USER
+  async updateUserPlayer({ dispatch, commit, state }, userPlayer) {
+    commit(
+      "set",
+      toKV(
+        "players",
+        state.players.map(p => {
+          if (p?.id === state.playerId) return userPlayer;
+          else return p;
+        })
+      )
+    );
 
+    await dispatch("updateRoom");
+  },
   // OTHERS
   reset({ commit }) {
     commit("reset");
+  },
+  // JUEGO
+  async fillHands({ dispatch, state }) {
+    state.players.map(player => {
+      while (player.hand.length < 7) player.hand.push(state.lettersDeck.pop());
+    });
+    await dispatch("updateRoom");
   },
 };
 
