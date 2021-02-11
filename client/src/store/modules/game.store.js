@@ -355,11 +355,37 @@ const actions = {
   },
   // ENDGAME
   async checkGameover({ dispatch }) {
-    // const twoRoundsPassing = state.movesHistory.map(move => move.words.length === 0); /* hacer */
-    // const state.players.map(p=> !p.wasKickedOut);
+    const totalPlayers = state.players.filter((player) => !player.wasKickedOut);
+
+    let allPlayersPassed = true;
+
+    for (let player of totalPlayers) {
+
+      let playerRoundsPassing = 0;
+      let i = state.movesHistory.length - 1
+      let playerMove;
+
+      while (playerRoundsPassing < 2 && allPlayersPassed && i >= 0) {
+        playerMove = state.movesHistory[i];
+
+        if (playerMove.alias == player.idGame) {
+          if (playerMove.words == "") {
+            playerRoundsPassing++;
+          } else {
+            allPlayersPassed = false;
+          }
+        }
+
+        i--;
+      }
+
+      if (allPlayersPassed == false) {
+        break;
+      }
+    }
 
     const imWinner = false; /* hacer */
-    if (twoRoundsPassing && imWinner) {
+    if (allPlayersPassed && imWinner) {
       await dispatch("reportScore");
     }
   },
