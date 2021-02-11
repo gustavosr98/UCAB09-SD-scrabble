@@ -34,7 +34,7 @@ export class UsersService extends TypeOrmCrudService<User> {
 
     /**
      * This method allows to create users in database according to the
-     * given attributes, validating that the given username is not taken. 
+     * given attributes, validating that the given username is not taken.
      * Also, this method automatically generates the salt
      * in order to hash the password so it won't be saved as plain text.
      * @param user user object to store in database
@@ -76,7 +76,7 @@ export class UsersService extends TypeOrmCrudService<User> {
             GROUP BY us.username, us.full_name
             ORDER BY SUM(ug.total_points) DESC
             LIMIT ${limit} OFFSET ${page};
-            `
+            `,
         );
         const count = await this.repo.query(
             `
@@ -92,9 +92,9 @@ export class UsersService extends TypeOrmCrudService<User> {
                 GROUP BY us.username, us.full_name
                 ORDER BY SUM(ug.total_points) DESC
             ) as ranking;
-            `
+            `,
         );
-        return { ranking, count: Number(count[0].count) }
+        return { ranking, count: Number(count[0].count) };
     }
 
     public async getGamesByUser(id) {
@@ -105,7 +105,8 @@ export class UsersService extends TypeOrmCrudService<User> {
             .innerJoinAndSelect('games.status', 'status')
             .andWhere(`games.status != ${Status.FINISHED}`)
             .andWhere(`users.id = ${id}`)
+            .andWhere(`userGames.wasKickedOut = false`);
 
-        return await query.getOne()
+        return await query.getOne();
     }
 }

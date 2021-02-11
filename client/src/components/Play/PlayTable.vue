@@ -15,12 +15,7 @@
           hide-details
           class="d-flex inline"
         ></v-text-field>
-        <v-btn
-          @click="refreshContent"
-          class="mx-2"
-          x-small
-          fab
-        >
+        <v-btn @click="refreshContent" class="mx-2" x-small fab>
           <v-icon dark color="primary">mdi-refresh</v-icon>
         </v-btn>
         <v-btn
@@ -60,10 +55,7 @@
         </v-data-table>
       </v-col>
     </v-row>
-    <PlayFormModal
-      :showModal="createDialog"
-      @showDialog="showDialog"
-    />
+    <PlayFormModal :showModal="createDialog" @showDialog="showDialog" />
   </v-container>
 </template>
 
@@ -74,7 +66,7 @@ import { mapMutations } from "vuex";
 export default {
   name: "play-table",
   components: {
-    PlayFormModal
+    PlayFormModal,
   },
   data() {
     return {
@@ -87,13 +79,17 @@ export default {
       headers: [
         { text: "Identificador", value: "id", align: "center" },
         { text: "Creador", value: "host", align: "center" },
-        { text: "En la sala (Max. 4)", value: "totalUsersPlaying", align: "center", },
+        {
+          text: "En la sala (Max. 4)",
+          value: "totalUsersPlaying",
+          align: "center",
+        },
         { text: "Privado", value: "private", align: "center" },
         { text: "Entrar", align: "start", sortable: false, value: "access" },
       ],
       count: 0,
       options: {},
-    }
+    };
   },
   methods: {
     ...mapMutations("ux", ["setBackgroundDark"]),
@@ -108,26 +104,31 @@ export default {
 
       const { page, itemsPerPage } = this.options;
 
-      await this.$store.dispatch("games/getMany", { limit: page * itemsPerPage, page: (page - 1) * itemsPerPage });
+      await this.$store.dispatch("games/getMany", {
+        limit: page * itemsPerPage,
+        page: (page - 1) * itemsPerPage,
+      });
 
       const games = this.$store.getters["games/get"]("games");
 
       if (games.data) {
-        this.count = games.count
-        this.items = games.data.map((game) => {
-          const hostFound = game.userGames.find((userGame) => userGame.isHost === true);
-          
-          let host = hostFound ? hostFound.user.username : 'N/D';
-          
+        this.count = games.count;
+        this.items = games.data.map(game => {
+          const hostFound = game.userGames.find(
+            userGame => userGame.isHost === true
+          );
+
+          let host = hostFound ? hostFound.user.username : "N/D";
+
           return {
             id: game.id,
             host,
             totalUsersPlaying: game.userGames.length,
             private: !!game.accessPassword,
             access: true,
-          }
+          };
         });
-  
+
         this.loading = false;
       }
     },
@@ -143,37 +144,42 @@ export default {
           id: this.$store.getters["users/get"]("user").id,
         },
         game: {
-          id: game.id
-        }  
-      }
+          id: game.id,
+        },
+      };
       await this.$store.dispatch("games/createUserGame", userGames);
 
       this.$store.commit("games/set", { key: "game", value: game });
       this.$router.push({ name: "Game" });
     },
     async validateGame() {
-      const userGame = await this.$store.dispatch("users/getGamesByUser", {id: this.$store.getters["users/get"]("user").id})
+      const userGame = await this.$store.dispatch("users/getGamesByUser", {
+        id: this.$store.getters["users/get"]("user").id,
+      });
       if (userGame) {
-        this.$store.commit("games/set", { key: "game", value: userGame.userGames[0].game });
+        this.$store.commit("games/set", {
+          key: "game",
+          value: userGame.userGames[0].game,
+        });
         this.$router.push({ name: "Game" });
       }
-    }
+    },
   },
   watch: {
     options: {
       async handler() {
-        await this.loadGames(); 
+        await this.loadGames();
       },
       deep: true,
     },
   },
   async mounted() {
-    await this.validateGame()
+    await this.validateGame();
     await this.loadGames();
   },
   created() {
-    this.setBackgroundDark({value: false})
-  }
+    this.setBackgroundDark({ value: false });
+  },
 };
 </script>
 

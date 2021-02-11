@@ -5,7 +5,9 @@
         <v-row v-if="isHost" justify="center">
           <v-icon color="white">mdi-play</v-icon>
           <v-col cols="10">
-            <v-btn block @click="startGame()">Empezar juego</v-btn>
+            <v-btn block @click="startGame()" :disabled="isGameInProgress"
+              >Empezar juego</v-btn
+            >
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -38,41 +40,41 @@
 </template>
 
 <script>
+import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 
 export default {
   name: "actions",
-  components: {
-  },
+  components: {},
   props: {
     isHost: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      allowGoOut: true
+      allowGoOut: true,
     };
   },
   computed: {
-	},
-  methods: {
-    startGame() {
-
+    isGameInProgress() {
+      return this.$store.state.game.status === ROOM_STATUS.IN_PROGRESS;
     },
+  },
+  methods: {
+    startGame() {},
     sendMove() {
       this.$emit("sendMove");
     },
     take() {},
     pass() {},
-    goOut() {
+    async goOut() {
+      await this.$store.dispatch("game/exitRoom");
       this.$router.push({ name: "Play" });
-    }
-	},
-  mounted() {
+    },
   },
+  mounted() {},
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

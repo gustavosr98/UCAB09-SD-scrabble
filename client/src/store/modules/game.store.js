@@ -1,7 +1,13 @@
 import zkClient from "@/connections/zookeeper/zk-client";
+import Logger from "@/utils/logger";
+import GamesRepository from "@/connections/server/repositories/games.repository.js";
+import UsersRepository from "@/connections/server/repositories/users.repository.js";
+
 import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
 
-import Logger from "@/utils/logger";
+const gamesRepository = new GamesRepository();
+const usersRepository = new UsersRepository();
+
 const TURN_TIMER_INITIAL = 300;
 
 // Initial State object
@@ -15,6 +21,7 @@ const initialState = () => {
     // base
     roomId: null,
     playerId: null,
+    userGame: null,
     // shard inside room-{id}
     players: [],
     status: null,
@@ -101,14 +108,18 @@ const actions = {
     if (!(await zkClient.exists(`/room-${state.roomId}`))) {
       commit("error", "La sala no existe o ya ha sido cerrada");
     } else {
-      const room = await zkClient.getData(`/room-${state.roomId}`, event => {
-        if (zkClient.Event.NODE_DATA_CHANGED === event.getType()) {
-          console.log("CAMBIE");
-        }
-      });
-      commit("setRoom", room);
+      await dispatch("getData");
       await dispatch("createEphemeral");
     }
+  },
+  async getData({ dispatch, commit }) {
+    const room = await zkClient.getData(`/room-${state.roomId}`, event => {
+      if (zkClient.Event.NODE_DATA_CHANGED === event.getType()) {
+        console.log("CAMBIE");
+        dispatch("getData");
+      }
+    });
+    commit("setRoom", room);
   },
   async createEphemeral({ commit, state }) {
     try {
@@ -121,7 +132,8 @@ const actions = {
   async createRoom({ dispatch, commit }, { roomId, user }) {
     commit("set", toKV("playerId", user.id));
     await dispatch("connect");
-    try {
+
+    if (!(await zkClient.exists(`/room-${roomId}`))) {
       await zkClient.create(`/room-${roomId}`);
       await zkClient.setData(`/room-${roomId}`, {
         players: [
@@ -142,8 +154,6 @@ const actions = {
           playerId: user.id,
         },
       });
-    } catch {
-      commit("error", "Hubo un problema creando la sala.");
     }
 
     await dispatch("enterRoom", { roomId, user });
@@ -192,7 +202,7 @@ const actions = {
     });
   },
   async exitRoom({ dispatch, state }) {
-    if (state.ROOM_STATUS.IN_PROGRESS) {
+    if (ROOM_STATUS.IN_PROGRESS) {
       await dispatch("kickOutOfRoomForcely", state.playerId);
     } else {
       await dispatch("kickOutOfRoomGently", state.playerId);
@@ -205,16 +215,34 @@ const actions = {
       toKV(
         "players",
         state.players.map(p => {
-          if (p?.user.id === playerId) {
-            p.user.wasKickedOut = true;
+          if (p?.info.id === playerId) {
+            p.info.wasKickedOut = true;
           } else return p;
         })
       )
     );
+
+    const playerUserGame = await usersRepository.getUserGame(
+      playerId,
+      state.roomId
+    );
+    await gamesRepository.updateUserGame(playerUserGame.id, {
+      totalPoints: 0,
+      isHost: playerUserGame.isHost,
+      wasKickedOut: true,
+    });
+
     dispatch("updateRoom");
   },
   async kickOutOfRoomGently({ dispatch, commit, state }, playerId) {
     commit("set");
+
+    const playerUserGame = await usersRepository.getUserGame(
+      playerId,
+      state.roomId
+    );
+    await gamesRepository.deleteUserGame(playerUserGame.id);
+
     dispatch("updateRoom");
   },
   async closeRoom({ state }) {

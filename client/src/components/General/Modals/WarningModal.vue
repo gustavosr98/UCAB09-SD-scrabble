@@ -11,7 +11,13 @@
         <v-card-text class="word-break">{{ message }}</v-card-text>
         <v-card-actions class="d-flex justify-end">
           <v-btn color="grey" dark @click="cancelAction">{{ cancel }}</v-btn>
-          <v-btn color="error lighten-1" dark @click="okAction">{{ ok }}</v-btn>
+          <v-btn
+            if="withCancelBtn"
+            color="error lighten-1"
+            dark
+            @click="okAction"
+            >{{ ok }}</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-card>
@@ -27,6 +33,7 @@ export default {
     message: { type: String, required: true },
     ok: { type: String, required: false, default: "vale" },
     cancel: { type: String, required: false, default: "cancelar" },
+    withCancelBtn: { type: Boolean, required: false, default: true },
   },
   methods: {
     okAction() {

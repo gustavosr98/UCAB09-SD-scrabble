@@ -1,5 +1,6 @@
 var zookeeper = require("node-zookeeper-client");
 import Logger from "@/utils/logger";
+
 export class ZKClient {
   #zkUrl;
   #client;
@@ -137,7 +138,8 @@ export class ZKClient {
         this.basePath + path,
         getDataWatcher,
         (error, data, stat) => {
-          this.handleError(error, "getData");
+          if (error && error.name !== "CONNECTION_LOSS")
+            this.handleError(error, "getData");
           resolve(JSON.parse(data.toString())?.v);
         }
       );

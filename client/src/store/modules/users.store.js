@@ -1,6 +1,6 @@
 import httpClient from "@/connections/server/http-client";
 import jwt from "@/connections/server/jwt.service";
-import UsersRepository from "@/connections/server/repositories/users.respository";
+import UsersRepository from "@/connections/server/repositories/users.repository";
 const usersRepository = new UsersRepository();
 
 const initialState = () => {
@@ -16,7 +16,7 @@ const initialState = () => {
 const state = initialState();
 
 const getters = {
-  get: (state) => (key) => {
+  get: state => key => {
     return state[key];
   },
 };
@@ -72,20 +72,20 @@ const actions = {
       commit("set", { key: "error", value: e.response });
     }
   },
-  async getUserGame({ commit }, {idUser, idGame}) {
+  async getUserGame({ commit }, { idUser, idGame }) {
     try {
       const response = await usersRepository.getUserGame(idUser, idGame);
       commit("set", { key: "error", value: "" });
-      return response
+      return response;
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }
   },
-  async getGamesByUser({ commit }, {id}) {
+  async getGamesByUser({ commit }, { id }) {
     try {
       const response = await usersRepository.getGamesByUser(id);
       commit("set", { key: "error", value: "" });
-      return response
+      return response;
     } catch (e) {
       commit("set", { key: "error", value: e.response });
     }

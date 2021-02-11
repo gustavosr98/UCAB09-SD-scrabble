@@ -22,6 +22,14 @@ export default class GamesRepository extends Repository {
   }
 
   async createUserGame(userGame) {
-    return this.httpClient.post('user-game', userGame);
+    return this.httpClient.post("user-game", userGame);
+  }
+
+  async updateUserGame(id, userGame) {
+    return this.httpClient.patch(`user-game/${id}`, userGame);
+  }
+
+  async deleteUserGame(id) {
+    return this.httpClient.delete(`user-game/${id}`);
   }
 }

@@ -26,10 +26,20 @@
         <board ref="board" />
       </v-col>
     </v-row>
+    <!-- MODALS -->
+    <warning-modal
+      :showModal="!!$store.state.game.error.major"
+      title="Error"
+      :message="$store.state.game.error.major || ''"
+      ok="Vale"
+      @okAction="$refs.actions.goOut()"
+      :withCancelBtn="false"
+    />
   </v-container>
 </template>
 
 <script>
+import WarningModal from "@/components/General/Modals/WarningModal";
 import LogoFull from "@/assets/Brand/Logo_Full.png";
 import Timer from "@/components/Play/Timer";
 import Players from "@/components/Play/Players";
@@ -42,6 +52,7 @@ import { mapMutations } from "vuex";
 export default {
   name: "game",
   components: {
+    WarningModal,
     timer: Timer,
     players: Players,
     moves: Moves,
@@ -104,6 +115,7 @@ export default {
         idGame: this.game.id,
       });
       console.log(this.userGame);
+      this.$store.commit("game/set", { key: "userGame", value: this.userGame });
       this.gameInfo = await this.$store.dispatch(
         "games/getGameWithUsers",
         this.game.id
