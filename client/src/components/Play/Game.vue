@@ -67,7 +67,6 @@ export default {
       game: {},
       user: {},
       gameInfo: {},
-      isHost: {},
       playersList: [],
       movesList: [
         {

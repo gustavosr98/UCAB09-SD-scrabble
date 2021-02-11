@@ -13,6 +13,7 @@ const TURN_TIMER_INITIAL = 300;
 // Initial State object
 const initialState = () => {
   return {
+    // LOCAL
     timer: {
       timer: null,
       time: TURN_TIMER_INITIAL,
@@ -22,7 +23,12 @@ const initialState = () => {
     roomId: null,
     playerId: null,
     userGame: null,
-    // shard inside room-{id}
+    // ui
+    error: {
+      minor: null,
+      major: null,
+    },
+    // SHARED
     players: [],
     status: null,
     lettersDeck: [],
@@ -31,11 +37,6 @@ const initialState = () => {
     actualRound: null,
     turn: {
       playerId: null,
-    },
-    // ui
-    error: {
-      minor: null,
-      major: null,
     },
   };
 };
@@ -92,6 +93,11 @@ const mutations = {
 
 // Actions
 const actions = {
+  // SETTER
+  async set({ dispatch, commit }, { key, value }) {
+    commit("set", { key, value });
+    dispatch("updateRoom");
+  },
   // CONNECTION
   async connect({ commit }) {
     try {

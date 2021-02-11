@@ -46,7 +46,6 @@
 
 <script>
 import { ROOM_STATUS, MOVE_TYPE } from "@/config/constants";
-
 export default {
   name: "actions",
   components: {},
