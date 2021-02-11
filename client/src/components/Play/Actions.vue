@@ -90,16 +90,11 @@ export default {
       await this.$store.dispatch("game/pass");
     },
     async goOut() {
-      try {
-        await this.$store.dispatch(
-          "game/exitRoom",
-          this.$store.state.game.playerId
-        );
-      } catch (e) {
-        console.log(e);
-      } finally {
-        this.$router.push({ name: "Play" });
-      }
+      this.$router.push({ name: "Play" });
+      await this.$store.dispatch(
+        "game/exitRoom",
+        this.$store.state.game.playerId
+      );
     },
   },
 };
