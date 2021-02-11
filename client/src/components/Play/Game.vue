@@ -23,7 +23,7 @@
         </v-row>
       </v-col>
       <v-col cols="8">
-        <board ref="board" />
+        <board ref="board" :user="user"/>
       </v-col>
     </v-row>
   </v-container>
